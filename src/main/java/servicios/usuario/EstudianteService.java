@@ -16,7 +16,6 @@ public class EstudianteService {
         this.estudianteDAO = new EstudianteDAOImpl();
     }
 
-
     //Validar estudiante
     private void validarEstudiante(Estudiante estudiante) {
 
@@ -123,5 +122,30 @@ public class EstudianteService {
         }
 
         return estudianteDAO.buscarPorNombreApellido(texto);
+    }
+
+    // Buscar por carrera
+    public List<Estudiante> buscarPorCarrera(int idCarrera) {
+
+        if (idCarrera <= 0) {
+            throw new RuntimeException("ID de carrera inválido");
+        }
+
+        return estudianteDAO.buscarPorCarrera(idCarrera);
+    }
+
+    // Buscar por grupo
+    public List<Estudiante> buscarPorGrupo(int idGrupo) {
+
+        if (idGrupo <= 0) {
+            throw new RuntimeException("ID de grupo inválido");
+        }
+
+        return estudianteDAO.buscarPorGrupo(idGrupo);
+    }
+
+    // Buscar por estado
+    public List<Estudiante> buscarPorEstado(boolean estado) {
+        return estudianteDAO.buscarPorEstado(estado);
     }
 }

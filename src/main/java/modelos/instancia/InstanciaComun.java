@@ -1,6 +1,8 @@
 package modelos.instancia;
 import modelos.usuario.Estudiante;
 import modelos.usuario.Funcionario;
+import prototype.Clonar;
+
 import java.time.LocalDateTime;
 
 public class InstanciaComun extends Instancia {
@@ -16,4 +18,19 @@ public class InstanciaComun extends Instancia {
     public Categoria getCategoria(){return categoria;}
     //Setters
     public void setCategoria(Categoria categoria){this.categoria=categoria;}
+
+    @Override
+    public Clonar clonar() {
+        return new InstanciaComun(
+                0,
+                this.comConfidencial,
+                this.titulo + " (copia)",
+                LocalDateTime.now(),
+                this.comentario,
+                this.estado,
+                this.estudiante,
+                this.funcionario,
+                this.categoria
+        );
+    }
 }

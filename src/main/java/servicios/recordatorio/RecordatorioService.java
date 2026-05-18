@@ -1,15 +1,17 @@
 package servicios.recordatorio;
-import dao.recordatorio.RecordatorioDAO;
-import dao.recordatorio.RecordatorioDAOImpl;
-import modelos.recordatorio.Recordatorio;
+import dao.recordatorio.*;
+import modelos.recordatorio.*;
 import java.util.List;
 
 public class RecordatorioService {
 
     private final RecordatorioDAO recordatorioDAO;
+    private final FrecuenciaDAO frecuenciaDAO;
 
     public RecordatorioService() {
         this.recordatorioDAO = new RecordatorioDAOImpl();
+        this.frecuenciaDAO = new FrecuenciaDAOImpl();
+
     }
 
     private void validarRecordatorio(Recordatorio recordatorio) {
@@ -68,5 +70,14 @@ public class RecordatorioService {
             throw new RuntimeException("ID inválido");
         }
         return recordatorioDAO.obtenerPorInstancia(idInstancia);
+    }
+
+    public List<Frecuencia> obtenerFrecuencias() {
+        return frecuenciaDAO.obtenerTodas();
+    }
+
+    public Frecuencia obtenerFrecuenciaPorId(int id) {
+        if (id <= 0) throw new RuntimeException("ID inválido");
+        return frecuenciaDAO.obtenerPorId(id);
     }
 }

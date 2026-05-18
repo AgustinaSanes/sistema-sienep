@@ -26,6 +26,7 @@ public class CarreraService {
 
     public void agregarCarrera(Carrera carrera) {
         validarCarrera(carrera);
+
         List<Carrera> carreras = carreraDAO.obtenerTodas();
         for (Carrera c : carreras) {
             if (c.getNombre().equalsIgnoreCase(carrera.getNombre())) {

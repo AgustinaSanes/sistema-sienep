@@ -12,7 +12,7 @@ import java.util.List;
 
 public class InstanciaDAOImpl implements InstanciaDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public InstanciaDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

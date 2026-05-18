@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PermisoDAOImpl implements PermisoDAO {
-    private Connection c;
+
+    private final Connection c;
     public PermisoDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();
     }

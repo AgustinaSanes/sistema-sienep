@@ -8,4 +8,7 @@ public interface EstudianteDAO {
     void actualizarEstudiante(Estudiante estudiante);
     Estudiante obtenerPorCedula(String cedula);
     List<Estudiante> buscarPorNombreApellido(String texto);
+    List<Estudiante> buscarPorCarrera(int idCarrera);
+    List<Estudiante> buscarPorGrupo(int idGrupo);
+    List<Estudiante> buscarPorEstado(boolean estado);
 }

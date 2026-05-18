@@ -8,7 +8,7 @@ import java.util.List;
 
 public class PermisoService {
 
-    private PermisoDAO permisoDAO;
+    private final PermisoDAO permisoDAO;
 
     public PermisoService() {
         this.permisoDAO = new PermisoDAOImpl();

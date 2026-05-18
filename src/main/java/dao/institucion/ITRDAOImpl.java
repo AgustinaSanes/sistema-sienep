@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ITRDAOImpl implements ITRDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public ITRDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

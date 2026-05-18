@@ -11,7 +11,7 @@ import java.util.List;
 
 public class RolPermisoDAOImpl implements RolPermisoDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public RolPermisoDAOImpl() {
         this.c = ConexionBDSingleton

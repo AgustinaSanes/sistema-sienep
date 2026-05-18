@@ -10,7 +10,7 @@ import java.util.List;
 
 public class EstudianteDAOImpl implements EstudianteDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public EstudianteDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();
@@ -32,13 +32,8 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             ps.setInt(2, estudiante.getGrupo().getId());
             ps.setString(3, estudiante.getFoto());
             ps.setString(4, estudiante.getSistemaSalud());
-
-            ps.setDate(5,
-                    Date.valueOf(estudiante.getFechaNacimiento()));
-
-            ps.setBoolean(6,
-                    estudiante.isObsConfidenciales());
-
+            ps.setDate(5, Date.valueOf(estudiante.getFechaNacimiento()));
+            ps.setBoolean(6, estudiante.isObsConfidenciales());
             ps.setString(7, estudiante.getMotivo());
             ps.setString(8, estudiante.getObsComentarios());
             ps.setString(9, estudiante.getInfoEstadoSalud());
@@ -67,19 +62,13 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             ps.setInt(1, estudiante.getGrupo().getId());
             ps.setString(2, estudiante.getFoto());
             ps.setString(3, estudiante.getSistemaSalud());
-
-            ps.setDate(4,
-                    Date.valueOf(estudiante.getFechaNacimiento()));
-
-            ps.setBoolean(5,
-                    estudiante.isObsConfidenciales());
-
+            ps.setDate(4, Date.valueOf(estudiante.getFechaNacimiento()));
+            ps.setBoolean(5, estudiante.isObsConfidenciales());
             ps.setString(6, estudiante.getMotivo());
             ps.setString(7, estudiante.getObsComentarios());
             ps.setString(8, estudiante.getInfoEstadoSalud());
             ps.setString(9, estudiante.getCalle());
             ps.setString(10, estudiante.getNroPuerta());
-
             ps.setString(11, estudiante.getCedula());
 
             ps.executeUpdate();
@@ -93,6 +82,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
     @Override
     public Estudiante obtenerPorCedula(String cedula) {
 
+        //La consulta SQL trae los datos de la BD y los guarda en rs
         String sql =
                 "SELECT u.*, e.*, r.nom_rol, r.estado AS estado_rol " +
                         "FROM usuarios u " +
@@ -106,39 +96,10 @@ public class EstudianteDAOImpl implements EstudianteDAO {
 
             ResultSet rs = ps.executeQuery();
 
+            //Lee esos datos del rs y construye el objeto Estudiante
+            //Es la traducción de "lenguaje de base de datos" a "lenguaje Java
             if (rs.next()) {
-
-                return new Estudiante(
-                        rs.getString("cedula"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("email"),
-                        rs.getString("contrasena"),
-                        rs.getBoolean("estado"),
-
-                        new Rol(
-                                rs.getInt("id_rol"),
-                                rs.getString("nom_rol"),
-                                rs.getBoolean("estado_rol")
-                        ),
-
-                        rs.getString("foto"),
-                        rs.getString("sis_salud"),
-
-                        rs.getDate("fec_nacimiento")
-                                .toLocalDate(),
-
-                        rs.getString("calle"),
-                        rs.getString("nro_puerta"),
-
-                        rs.getBoolean("obs_confidenciales"),
-
-                        rs.getString("motivo"),
-                        rs.getString("obs_comentarios"),
-                        rs.getString("inf_esta_salud"),
-
-                        null
-                );
+                return mapearEstudiante(rs);
             }
 
         } catch (SQLException e) {
@@ -170,40 +131,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-
-                Estudiante e = new Estudiante(
-                        rs.getString("cedula"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("email"),
-                        rs.getString("contrasena"),
-                        rs.getBoolean("estado"),
-
-                        new Rol(
-                                rs.getInt("id_rol"),
-                                rs.getString("nom_rol"),
-                                rs.getBoolean("estado_rol")
-                        ),
-
-                        rs.getString("foto"),
-                        rs.getString("sis_salud"),
-
-                        rs.getDate("fec_nacimiento")
-                                .toLocalDate(),
-
-                        rs.getString("calle"),
-                        rs.getString("nro_puerta"),
-
-                        rs.getBoolean("obs_confidenciales"),
-
-                        rs.getString("motivo"),
-                        rs.getString("obs_comentarios"),
-                        rs.getString("inf_esta_salud"),
-
-                        null
-                );
-
-                lista.add(e);
+                lista.add(mapearEstudiante(rs));
             }
 
         } catch (SQLException e) {
@@ -211,5 +139,109 @@ public class EstudianteDAOImpl implements EstudianteDAO {
         }
 
         return lista;
+    }
+
+    //Buscar por carrera
+    @Override
+    public List<Estudiante> buscarPorCarrera(int idCarrera){
+        List<Estudiante> lista = new ArrayList<>();
+
+        String sql = "SELECT u.*, e.*, r.nom_rol, r.estado AS estado_rol " +
+                "FROM usuarios u " +
+                "JOIN estudiantes e ON u.cedula = e.cedula " +
+                "JOIN roles r ON u.id_rol = r.id_rol " +
+                "JOIN grupos g ON e.id_grupo = g.id_grupo " +
+                "WHERE g.id_carrera = ? AND u.estado = true";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, idCarrera);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) lista.add(mapearEstudiante(rs));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    //Buscar por grupo
+    @Override
+    public List<Estudiante> buscarPorGrupo(int idGrupo) {
+
+        List<Estudiante> lista = new ArrayList<>();
+
+        String sql = "SELECT u.*, e.*, r.nom_rol, r.estado AS estado_rol " +
+                "FROM usuarios u " +
+                "JOIN estudiantes e ON u.cedula = e.cedula " +
+                "JOIN roles r ON u.id_rol = r.id_rol " +
+                "WHERE e.id_grupo = ? AND u.estado = true";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, idGrupo);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) lista.add(mapearEstudiante(rs));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    //Buscar por estado
+    @Override
+    public List<Estudiante> buscarPorEstado(boolean estado) {
+
+        List<Estudiante> lista = new ArrayList<>();
+
+        String sql = "SELECT u.*, e.*, r.nom_rol, r.estado AS estado_rol " +
+                "FROM usuarios u " +
+                "JOIN estudiantes e ON u.cedula = e.cedula " +
+                "JOIN roles r ON u.id_rol = r.id_rol " +
+                "WHERE u.estado = ?";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setBoolean(1, estado);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) lista.add(mapearEstudiante(rs));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    private Estudiante mapearEstudiante(ResultSet rs) throws SQLException{
+        return new Estudiante(
+                rs.getString("cedula"),
+                rs.getString("nombre"),
+                rs.getString("apellido"),
+                rs.getString("email"),
+                rs.getString("contrasena"),
+                rs.getBoolean("estado"),
+                //Estudiante hereda de Usuario que tiene un atributo Rol rol.
+                new Rol(
+                        rs.getInt("id_rol"),
+                        rs.getString("nom_rol"),
+                        rs.getBoolean("estado_rol")
+                ),
+                rs.getString("foto"),
+                rs.getString("sis_salud"),
+                rs.getDate("fec_nacimiento").toLocalDate(),
+                rs.getString("calle"),
+                rs.getString("nro_puerta"),
+                rs.getBoolean("obs_confidenciales"),
+                rs.getString("motivo"),
+                rs.getString("obs_comentarios"),
+                rs.getString("inf_esta_salud")
+        );
     }
 }

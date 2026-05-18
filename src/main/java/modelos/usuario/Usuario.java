@@ -8,13 +8,12 @@ public abstract class Usuario {
     protected String email;
     protected String contrasena;
     protected boolean estado;
-    //Relacion(N:1)
-    private Rol rol;
+    //Relaciones
+    protected Rol rol;
 
-    public Usuario() {
-    }
+    //Constructores
+    public Usuario() {}
 
-    //Constructor
     public Usuario(String cedula, String nombre, String apellido, String email, String contrasena,
                          boolean estado,Rol rol) {
         this.cedula=cedula;
@@ -25,6 +24,7 @@ public abstract class Usuario {
         this.estado=estado;
         this.rol=rol;
     }
+
     //Getters
     public String getCedula(){return cedula;}
     public String getNombre(){return nombre;}
@@ -33,6 +33,7 @@ public abstract class Usuario {
     public String getContrasena(){return contrasena;}
     public boolean isEstado(){return estado;}
     public Rol getRol(){return rol;}
+
     //Setters
     public void setCedula(String cedula){this.cedula=cedula;}
     public void setNombre(String nombre){this.nombre=nombre;}
@@ -41,4 +42,14 @@ public abstract class Usuario {
     public void setContrasena(String contrasena){this.contrasena=contrasena;}
     public void setEstado(boolean estado){this.estado=estado;}
     public void setRol(Rol rol){this.rol=rol;}
+
+    @Override
+    public String toString() {
+        return "Cedula: " + cedula +
+                " | Nombre: " + nombre +
+                " | Apellido: " + apellido +
+                " | Email: " + email +
+                " | Estado: " + estado +
+                " | Rol: " + rol.getNombre();
+    }
 }

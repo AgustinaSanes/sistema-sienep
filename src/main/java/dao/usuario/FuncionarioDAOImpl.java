@@ -8,7 +8,7 @@ import java.util.List;
 
 public class FuncionarioDAOImpl implements FuncionarioDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public FuncionarioDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

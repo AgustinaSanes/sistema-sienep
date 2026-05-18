@@ -8,9 +8,9 @@ import java.util.List;
 
 public class UsuarioService {
 
-    private UsuarioDAO usuarioDAO;
-    private EstudianteDAO estudianteDAO;
-    private FuncionarioDAO funcionarioDAO;
+    private final UsuarioDAO usuarioDAO;
+    private final EstudianteDAO estudianteDAO;
+    private final FuncionarioDAO funcionarioDAO;
 
     public UsuarioService() {
         this.usuarioDAO = new UsuarioDAOImpl();

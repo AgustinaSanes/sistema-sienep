@@ -7,7 +7,8 @@ import java.util.List;
 
 
 public class CarreraDAOImpl implements CarreraDAO {
-    private Connection c;
+
+    private final Connection c;
 
     public CarreraDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

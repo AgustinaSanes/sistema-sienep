@@ -1,6 +1,8 @@
 package modelos.instancia;
 import modelos.usuario.Estudiante;
 import modelos.usuario.Funcionario;
+import prototype.Clonar;
+
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,4 +27,19 @@ public class Incidencia extends Instancia{
     //Setters
     public void setLugar(String lugar){this.lugar=lugar;}
     public void agregarInvolucrado(String involucrado){this.involucrados.add(involucrado);}
+
+    @Override
+    public Clonar clonar() {
+        return new Incidencia(
+                0,
+                this.comConfidencial,
+                this.titulo + " (copia)",
+                LocalDateTime.now(),
+                this.comentario,
+                this.estado,
+                this.estudiante,
+                this.funcionario,
+                this.lugar
+        );
+    }
 }

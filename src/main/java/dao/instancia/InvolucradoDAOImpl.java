@@ -6,7 +6,7 @@ import java.util.List;
 
 public class InvolucradoDAOImpl implements InvolucradoDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public InvolucradoDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

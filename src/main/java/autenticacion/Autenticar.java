@@ -1,19 +1,21 @@
 package autenticacion;
-
-import modelos.usuario.Usuario;
-import servicios.autenticacion.AutenticacionService;
+import facade.SistemaFacade;
+import modelos.usuario.*;
+import observer.*;
+import servicios.autenticacion.*;
 import util.ControlarSesion;
 import consola.*;
 import java.util.Scanner;
 
 public class Autenticar {
-
-    private final AutenticacionService autenticacionService =
-            new AutenticacionService();
-
+    private final AutenticacionService autenticacionService = new AutenticacionService();
     private final Scanner sc = new Scanner(System.in);
+    private final SistemaFacade facade = new SistemaFacade();
 
     public void iniciar() {
+        // Registrar observers
+        facade.agregarObserver(new AuditoriaObserver());
+        facade.agregarObserver(new EmailObserver());
 
         System.out.println("======================================");
         System.out.println("    BIENVENIDO A SISTEMA SIENEP     ");
@@ -43,6 +45,7 @@ public class Autenticar {
         }
     }
 
+    //Metodo mostrar menu
     private void abrirMenu(Usuario u) {
         MenuSistema menuSistema = new Menu();
         menuSistema.mostrar(u);

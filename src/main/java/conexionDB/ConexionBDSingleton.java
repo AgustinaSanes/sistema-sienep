@@ -1,18 +1,15 @@
 package conexionDB;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class ConexionBDSingleton {
-
     private static ConexionBDSingleton instancia;
-    private Connection conexion;
-    private String url = "jdbc:postgresql://localhost:5432/proyecto";;
-    private String usuario = "postgres";
-    private String contrasena = "Postgre";
+    private final Connection conexion;
 
     private ConexionBDSingleton() {
+        String url = "jdbc:postgresql://localhost:5432/proyecto";
+        String usuario = "postgres";
+        String contrasena = "Postgre";
+
         try {
             this.conexion = DriverManager.getConnection(url, usuario, contrasena);
 

@@ -3,7 +3,6 @@ import conexionDB.ConexionBDSingleton;
 import modelos.usuario.Usuario;
 import modelos.usuario.Funcionario;
 import modelos.usuario.Rol;
-import util.EncriptarContra;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.sql.SQLException;
 
 public class UsuarioDAOImpl implements UsuarioDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public UsuarioDAOImpl() {
         this.c = ConexionBDSingleton
@@ -37,7 +36,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             ps.setString(3, usuario.getNombre());
             ps.setString(4, usuario.getApellido());
             ps.setString(5, usuario.getEmail());
-            ps.setString(6, EncriptarContra.encriptar(usuario.getContrasena()));
+            ps.setString(6, usuario.getContrasena());
             ps.setBoolean(7, usuario.isEstado());
             ps.executeUpdate();
 
@@ -114,7 +113,6 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                         rs.getString("email"),
                         rs.getString("contrasena"),
                         rs.getBoolean("estado"),
-
                         new Rol(
                                 rs.getInt("id_rol"),
                                 rs.getString("nom_rol"),

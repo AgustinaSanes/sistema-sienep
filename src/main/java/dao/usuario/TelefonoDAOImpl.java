@@ -6,7 +6,7 @@ import java.util.List;
 
 public class TelefonoDAOImpl implements TelefonoDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public TelefonoDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

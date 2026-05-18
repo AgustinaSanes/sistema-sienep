@@ -5,7 +5,7 @@ import java.sql.*;
 
 public class ComunDAOImpl implements ComunDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public ComunDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

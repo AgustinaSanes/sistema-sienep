@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoriaDAOImpl implements CategoriaDAO {
-    private Connection c;
+    private final Connection c;
 
     public CategoriaDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GrupoDAOImpl implements GrupoDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public GrupoDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

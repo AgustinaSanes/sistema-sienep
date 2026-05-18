@@ -7,7 +7,7 @@ import java.util.List;
 
 public class FrecuenciaDAOImpl implements FrecuenciaDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public FrecuenciaDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

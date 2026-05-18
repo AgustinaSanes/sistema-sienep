@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RecordatorioDAOImpl implements RecordatorioDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public RecordatorioDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

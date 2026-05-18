@@ -2,11 +2,13 @@ package modelos.instancia;
 import modelos.recordatorio.Recordatorio;
 import modelos.usuario.Estudiante;
 import modelos.usuario.Funcionario;
+import prototype.Clonar;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
-public abstract class Instancia {
+public abstract class Instancia implements Clonar {
     protected int id;
     protected boolean comConfidencial;
     protected String titulo;
@@ -51,4 +53,5 @@ public abstract class Instancia {
     public void setEstudiante(Estudiante estudiante){this.estudiante=estudiante;}
     public void setFuncionario(Funcionario funcionario){this.funcionario=funcionario;}
     public void agregarRecordatorio(Recordatorio recordatorio){this.recordatorios.add(recordatorio);}
+
 }

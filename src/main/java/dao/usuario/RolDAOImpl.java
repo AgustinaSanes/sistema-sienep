@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RolDAOImpl implements RolDAO {
-    private Connection c;
+    private final Connection c;
     public RolDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();
     }

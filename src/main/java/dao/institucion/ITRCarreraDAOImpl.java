@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ITRCarreraDAOImpl implements ITRCarreraDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public ITRCarreraDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

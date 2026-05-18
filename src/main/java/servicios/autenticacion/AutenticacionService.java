@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 
 public class AutenticacionService {
 
-    private Connection conexion;
+    private final Connection conexion;
 
     public AutenticacionService() {
         this.conexion = ConexionBDSingleton.getInstancia().getConexion();

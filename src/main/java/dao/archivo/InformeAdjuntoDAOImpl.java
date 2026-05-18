@@ -7,7 +7,7 @@ import java.util.*;
 
 public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public InformeAdjuntoDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RolService {
 
-    private RolDAO rolDAO;
+    private final RolDAO rolDAO;
 
     public RolService() {
         this.rolDAO = new RolDAOImpl();

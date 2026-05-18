@@ -5,7 +5,7 @@ import java.sql.*;
 
 public class IncidenciaDAOImpl implements IncidenciaDAO {
 
-    private Connection c;
+    private final Connection c;
 
     public IncidenciaDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();

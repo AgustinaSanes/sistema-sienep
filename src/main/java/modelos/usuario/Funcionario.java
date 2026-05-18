@@ -9,21 +9,29 @@ public class Funcionario extends Usuario{
     private List<Instancia> instancias;
     private List<Recordatorio> recordatorios;
 
-    //Constructor
+    //Constructores
+    public Funcionario(){
+        super();
+    }
+
     public Funcionario(String cedula,String nombre,String apellido,String email,String contrasena,boolean estado,Rol rol){
         super(cedula,nombre,apellido,email,contrasena,estado,rol);
         this.instancias=new ArrayList<>();
         this.recordatorios=new ArrayList<>();
     }
-    //Constructor vacío
-    public Funcionario(){
-        super();
-    }
 
     //Getters
     public List<Instancia> getInstancias(){return instancias;}
     public List<Recordatorio> getRecordatorios(){return recordatorios;}
-    //Setters
+
+    //Metodos
     public void agregarInstancia(Instancia instancia){this.instancias.add(instancia);}
     public void agregarRecordatorio(Recordatorio recordatorio){this.recordatorios.add(recordatorio);}
+
+    @Override
+    public String toString() {
+        return super.toString() +
+                " | Instancias: " + instancias.size() +
+                " | Recordatorios: " + recordatorios.size();
+    }
 }
