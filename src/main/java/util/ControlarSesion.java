@@ -1,6 +1,5 @@
 package util;
 import modelos.usuario.Usuario;
-import java.time.LocalDateTime;
 
 public class ControlarSesion {
     private static Usuario usuarioLogueado;

@@ -3,25 +3,22 @@ import controlador.*;
 import facade.SistemaFacade;
 import modelos.usuario.*;
 import proxy.PermisosProxy;
-import servicios.institucion.*;
-import servicios.instancia.*;
-import servicios.recordatorio.*;
-import servicios.usuario.*;
 import java.util.*;
 
 public class Menu implements MenuSistema {
-    //Scanner
+    // Scannner, facade y proxy
     private final Scanner sc = new Scanner(System.in);
-    // Proxy para control de permisos
-    private final PermisosProxy proxy = new PermisosProxy(new SistemaFacade());
-    // Servicios simples que no necesitan Proxy
-    private final CategoriaService categoriaService = new CategoriaService();
-    private final RolService rolService = new RolService();
-    private final PermisoService permisoService = new PermisoService();
-    private final CarreraService carreraService = new CarreraService();
-    private final GrupoService grupoService = new GrupoService();
-    private final ITRService itrService = new ITRService();
-    private final RecordatorioService recordatorioService = new RecordatorioService();
+    private final SistemaFacade facade = new SistemaFacade();
+    private final PermisosProxy proxy = new PermisosProxy(facade);
+    // Controladores que usan proxy
+    private final FuncionarioControlador funcionarioControlador = new FuncionarioControlador(proxy);
+    private final EstudianteControlador estudianteControlador = new EstudianteControlador(proxy);
+    private final InstanciaControlador instanciaControlador = new InstanciaControlador(proxy);
+    private final RecordatorioControlador recordatorioControlador = new RecordatorioControlador(proxy);
+    // Controladores sin proxy
+    private final PerfilControlador perfilControlador = new PerfilControlador();
+    private final ReporteControlador reporteControlador = new ReporteControlador();
+    private final InstitucionControlador institucionControlador = new InstitucionControlador();
 
     // MENÚ GENERAL
     @Override
@@ -63,8 +60,6 @@ public class Menu implements MenuSistema {
     }
 
     // FUNCIONARIOS
-    private final FuncionarioControlador funcionarioControlador = new FuncionarioControlador();
-
     private void gestionFuncionarios() {
 
         int opcion;
@@ -100,8 +95,6 @@ public class Menu implements MenuSistema {
     }
 
     // ESTUDIANTES
-    private final EstudianteControlador estudianteControlador = new EstudianteControlador();
-
     private void gestionEstudiantes() {
 
         int opcion;
@@ -142,8 +135,6 @@ public class Menu implements MenuSistema {
     }
 
     // PERFILES
-    private final PerfilControlador perfilControlador = new PerfilControlador();
-
     private void gestionPerfiles() {
 
         int opcion;
@@ -241,8 +232,6 @@ public class Menu implements MenuSistema {
     }
 
     // INSTANCIAS
-    private final InstanciaControlador instanciaControlador = new InstanciaControlador();
-
     private void gestionInstancias() {
 
         int opcion;
@@ -282,8 +271,6 @@ public class Menu implements MenuSistema {
     }
 
     // RECORDATORIOS
-    private final RecordatorioControlador recordatorioControlador = new RecordatorioControlador();
-
     private void gestionRecordatorios() {
 
         int opcion;
@@ -319,8 +306,6 @@ public class Menu implements MenuSistema {
     }
 
     // REPORTES
-    private final ReporteControlador reporteControlador = new ReporteControlador();
-
     private void gestionReportes() {
 
         int opcion;
@@ -350,8 +335,6 @@ public class Menu implements MenuSistema {
     }
 
     // INSTITUCIONAL
-    private final InstitucionControlador institucionControlador = new InstitucionControlador();
-
     private void gestionInstitucional() {
 
         int opcion;
