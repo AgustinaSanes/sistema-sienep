@@ -1,16 +1,17 @@
 package proxy;
 import facade.SistemaFacade;
-import modelos.archivo.InformeAdjunto;
+import modelos.informe.InformeAdjunto;
 import modelos.instancia.*;
 import modelos.usuario.*;
 import util.ControlarSesion;
 import java.util.List;
 
 public class PermisosProxy {
-
     private final SistemaFacade facade;
 
-    public PermisosProxy(SistemaFacade facade) {this.facade = facade;}
+    public PermisosProxy(SistemaFacade facade) {
+        this.facade = facade;
+    }
 
     // VERIFICACION DE ROLES
     private void verificarRol(String... rolesPermitidos) {
@@ -38,11 +39,9 @@ public class PermisosProxy {
                 rol.equalsIgnoreCase("Psicopedagogo");
     }
 
-
     // USUARIOS
-    // Solo Administrador puede crear/modificar/eliminar usuarios
-    public void crearEstudiante(Estudiante estudiante) {
-        verificarRol("Administrador");
+    public void agregarEstudiante(Estudiante estudiante) {
+        verificarRol("Administrador","Psicopedagogo");
         facade.crearEstudiante(estudiante);
     }
 
@@ -68,7 +67,7 @@ public class PermisosProxy {
     }
 
     public List<Usuario> listarUsuarios() {
-        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
         return facade.listarUsuarios();
     }
 
@@ -89,12 +88,17 @@ public class PermisosProxy {
     }
 
     public List<Estudiante> buscarEstudiantesPorEstado(boolean estado) {
-        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
         return facade.buscarEstudiantesPorEstado(estado);
     }
 
+    public Estudiante buscarEstudiantePorCedula(String cedula) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+        return facade.buscarEstudiantePorCedula(cedula);
+    }
+
     // INSTANCIAS
-    // Psicopedagogo y Analista pueden crear/modificar
+    // Admin, Psicopedagogo y Analista pueden crear/modificar
     // Estudiante y Funcionario UTEC solo lectura no confidencial
     public void crearInstanciaComun(InstanciaComun comun) {
         verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
@@ -104,6 +108,21 @@ public class PermisosProxy {
     public void crearIncidencia(Incidencia incidencia) {
         verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
         facade.crearIncidencia(incidencia);
+    }
+
+    public void agregarInvolucrado(int idInstancia, String involucrado) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        facade.agregarInvolucrado(idInstancia, involucrado);
+    }
+
+    public void eliminarInvolucrado(int idInstancia, String involucrado) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        facade.eliminarInvolucrado(idInstancia, involucrado);
+    }
+
+    public List<String> obtenerInvolucrados(int idInstancia) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+        return facade.obtenerInvolucrados(idInstancia);
     }
 
     public void clonarInstancia(Instancia instancia) {
@@ -131,32 +150,102 @@ public class PermisosProxy {
         facade.eliminarInstancia(id);
     }
 
-    // INFORMES
+    public void categorizarInstancia(int idInstancia, int idCategoria) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        facade.categorizarInstancia(idInstancia, idCategoria);
+    }
+
+    public List<Instancia> listarInstanciasPorCategoria(int idCategoria) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+        return facade.listarInstanciasPorCategoria(idCategoria);
+    }
+
+    // CRUD CATEGORIAS
+    public void agregarCategoria(Categoria categoria) {
+        verificarRol("Administrador", "Psicopedagogo");
+        facade.agregarCategoria(categoria);
+    }
+
+    public void actualizarCategoria(Categoria categoria) {
+        verificarRol("Administrador", "Psicopedagogo");
+        facade.actualizarCategoria(categoria);
+    }
+
+    public void eliminarCategoria(int id) {
+        verificarRol("Administrador", "Psicopedagogo");
+        facade.eliminarCategoria(id);
+    }
+
+    public Categoria obtenerCategoriaPorId(int id) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+        return facade.obtenerCategoriaPorId(id);
+    }
+
+    public List<Categoria> listarCategorias() {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+        return facade.listarCategorias();
+    }
+
+    // Informes
     // Solo Psicopedagogo y Admin pueden ver confidenciales
     public void agregarInforme(InformeAdjunto informe) {
         verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
         facade.agregarInforme(informe);
     }
 
-    public void eliminarInforme(int id) {
-        verificarRol("Administrador", "Psicopedagogo");
-        facade.eliminarInforme(id);
+    public void actualizarInforme(InformeAdjunto informe) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        facade.actualizarInforme(informe);
     }
 
-    public List<InformeAdjunto> obtenerInformesPorEstudiante(String cedula) {
+    public void eliminarInforme(int id) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo");
+        facade.eliminarInforme(id);
+    }
+    public List<InformeAdjunto> obtenerInformePorEstudiante(String cedula) {
         verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
 
         List<InformeAdjunto> informes = facade.obtenerInformesPorEstudiante(cedula);
 
         // Si no puede ver confidenciales, filtra los informes confidenciales
         if (!puedeVerConfidencial()) {
-            informes.removeIf(InformeAdjunto::isConfidencial);
+            for (int i = informes.size() - 1; i >= 0; i--) {
+                if (informes.get(i).isConfidencial()) {
+                    informes.remove(i);
+                }
+            }
         }
-
         return informes;
     }
 
-    // METODO HELPER — puede ver confidencial?
+    public InformeAdjunto obtenerInformePorId(int id) {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+
+        InformeAdjunto informe = facade.obtenerInformePorId(id);
+
+        // ocultar confidenciales si no tiene permisos
+        if (informe != null && informe.isConfidencial() && !puedeVerConfidencial()) {
+            throw new RuntimeException("No tiene permisos para ver este informe");
+        }
+
+        return informe;
+    }
+
+    public List<InformeAdjunto> obtenerTodosInformes() {
+        verificarRol("Administrador", "Psicopedagogo", "Analista de Equipo Educativo", "Funcionario UTEC");
+
+        List<InformeAdjunto> informes = facade.listarInformes();
+
+        if (!puedeVerConfidencial()) {
+            for (int i = informes.size() - 1; i >= 0; i--) {
+                if (informes.get(i).isConfidencial()) {
+                    informes.remove(i);
+                }
+            }
+        }
+        return informes;
+    }
+
     public boolean puedeVerDatosConfidenciales() {
         return puedeVerConfidencial();
     }

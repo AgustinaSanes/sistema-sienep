@@ -3,6 +3,6 @@ import java.util.List;
 
 public interface TelefonoDAO {
     void agregarTelefono(String cedula, String numero);
-    void eliminarTelefono(int id);
+    void eliminarTelefono(String cedula, String numero);
     List<String> obtenerPorEstudiante(String cedula);
 }

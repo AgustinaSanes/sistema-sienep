@@ -37,7 +37,7 @@ public class RolService {
         List<Rol> roles = rolDAO.obtenerTodos();
         for (Rol r : roles) {
             if (r.getNombre().equalsIgnoreCase(rol.getNombre())) {
-                throw new RuntimeException("Ya existe un rol con ese nombre");
+                throw new RuntimeException("El nombre del rol ya se encuentra registrado");
             }
         }
 

@@ -10,6 +10,18 @@ public class CategoriaService {
 
     public CategoriaService() {
         this.categoriaDAO = new CategoriaDAOImpl();
+        inicializarCategoriasBase();
+    }
+
+    private void inicializarCategoriasBase() {
+        List<Categoria> existentes = categoriaDAO.obtenerTodas();
+        for (Categoria base : Categoria.cargarCategoriasBase()) {
+            boolean yaExiste = existentes.stream()
+                    .anyMatch(e -> e.getNombre().equalsIgnoreCase(base.getNombre()));
+            if (!yaExiste) {
+                categoriaDAO.agregarCategoria(base);
+            }
+        }
     }
 
     private void validarCategoria(Categoria categoria) {

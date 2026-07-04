@@ -1,6 +1,7 @@
 package dao.instancia;
 
 import conexionDB.ConexionBDSingleton;
+import modelos.instancia.Incidencia;
 import modelos.instancia.Instancia;
 import modelos.instancia.InstanciaComun;
 import modelos.usuario.Estudiante;
@@ -86,9 +87,15 @@ public class InstanciaDAOImpl implements InstanciaDAO {
             e.printStackTrace();
         }
     }
+
     @Override
     public Instancia obtenerPorId(int id) {
-        String sql = "SELECT * FROM instancias WHERE id_instancia = ? AND estado = true";
+        String sql =
+                "SELECT i.*, inc.lugar, com.id_categoria " +
+                        "FROM instancias i " +
+                        "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
+                        "LEFT JOIN inst_comunes com ON i.id_instancia = com.id_instancia " +
+                        "WHERE i.id_instancia = ? AND i.estado = true";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -101,19 +108,33 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                 Funcionario funcionario = new Funcionario();
                 funcionario.setCedula(rs.getString("ced_funcionario"));
 
-                // Lo dejamos sin tipo específico, InstanciaComun o Incidencia
-                // se resuelve en el service con ComunDAO o IncidenciaDAO
-                return new InstanciaComun(
-                        rs.getInt("id_instancia"),
-                        rs.getBoolean("com_confidencial"),
-                        rs.getString("titulo"),
-                        rs.getTimestamp("fec_hora").toLocalDateTime(),
-                        rs.getString("comentario"),
-                        rs.getBoolean("estado"),
-                        estudiante,
-                        funcionario,
-                        null
-                );
+                String lugar = rs.getString("lugar");
+
+                if (lugar != null) {
+                    return new Incidencia(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            lugar
+                    );
+                } else {
+                    return new InstanciaComun(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            null
+                    );
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -124,10 +145,70 @@ public class InstanciaDAOImpl implements InstanciaDAO {
     @Override
     public List<Instancia> obtenerPorEstudiante(String cedula) {
         List<Instancia> lista = new ArrayList<>();
-        String sql = "SELECT * FROM instancias WHERE ced_estudiante = ? AND estado = true";
+        String sql =
+                "SELECT i.*, inc.lugar " +
+                        "FROM instancias i " +
+                        "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
+                        "WHERE i.ced_estudiante = ? AND i.estado = true";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, cedula);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Estudiante estudiante = new Estudiante();
+                estudiante.setCedula(rs.getString("ced_estudiante"));
+
+                Funcionario funcionario = new Funcionario();
+                funcionario.setCedula(rs.getString("ced_funcionario"));
+
+                String lugar = rs.getString("lugar");
+                Instancia inst;
+
+                if (lugar != null) {
+                    inst = new Incidencia(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            lugar
+                    );
+                } else {
+                    inst = new InstanciaComun(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            null
+                    );
+                }
+                lista.add(inst);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    @Override
+    public List<Instancia> obtenerPorCategoria(int idCategoria) {
+        List<Instancia> lista = new ArrayList<>();
+        String sql =
+                "SELECT i.* " +
+                        "FROM instancias i " +
+                        "JOIN inst_comunes ic ON i.id_instancia = ic.id_instancia " +
+                        "WHERE ic.id_categoria = ? AND i.estado = true";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idCategoria);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {

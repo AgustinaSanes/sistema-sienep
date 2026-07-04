@@ -40,6 +40,33 @@ public class IncidenciaService {
         }
     }
 
+    public void agregarInvolucrado(int idInstancia, String involucrado) {
+
+        if (idInstancia <= 0) {
+            throw new RuntimeException("ID inválido");
+        }
+
+        if (involucrado == null || involucrado.trim().isEmpty()) {
+            throw new RuntimeException("El involucrado es obligatorio");
+        }
+
+        involucradoDAO.agregarInvolucrado(idInstancia, involucrado);
+    }
+
+
+    public void eliminarInvolucrado(int idInstancia, String involucrado) {
+
+        if (idInstancia <= 0) {
+            throw new RuntimeException("ID inválido");
+        }
+
+        if (involucrado == null || involucrado.trim().isEmpty()) {
+            throw new RuntimeException("El involucrado es obligatorio");
+        }
+
+        involucradoDAO.eliminarInvolucrado(idInstancia, involucrado);
+    }
+
     public void actualizarIncidencia(Incidencia incidencia) {
         validarIncidencia(incidencia);
         if (incidenciaDAO.obtenerPorInstancia(incidencia.getId()) == null) {
@@ -63,10 +90,10 @@ public class IncidenciaService {
         return incidenciaDAO.obtenerPorInstancia(idInstancia);
     }
 
-    public List<String> obtenerInvolucrados(int idIncidencia) {
-        if (idIncidencia <= 0) {
+    public List<String> obtenerInvolucrados(int idInstancia) {
+        if (idInstancia <= 0) {
             throw new RuntimeException("ID inválido");
         }
-        return involucradoDAO.obtenerPorIncidencia(idIncidencia);
+        return involucradoDAO.obtenerPorIncidencia(idInstancia);
     }
 }

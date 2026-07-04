@@ -21,7 +21,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, recordatorio.getId());
+            ps.setInt(1, recordatorio.getIdInstancia());
             ps.setInt(2, recordatorio.getFrecuencia().getId());
             ps.setString(3, recordatorio.getTitulo());
             ps.setTimestamp(4, Timestamp.valueOf(recordatorio.getFechaHora()));
@@ -83,17 +83,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Recordatorio(
-                        rs.getInt("id_recordatorio"),
-                        rs.getString("titulo"),
-                        rs.getTimestamp("fec_hora").toLocalDateTime(),
-                        rs.getString("tipo"),
-                        rs.getBoolean("estado"),
-                        new Frecuencia(
-                                rs.getInt("id_frecuencia"),
-                                rs.getString("desc_frecuencia")
-                        )
-                );
+                return mapearRecordatorio(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -114,22 +104,26 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Recordatorio rec = new Recordatorio(
-                        rs.getInt("id_recordatorio"),
-                        rs.getString("titulo"),
-                        rs.getTimestamp("fec_hora").toLocalDateTime(),
-                        rs.getString("tipo"),
-                        rs.getBoolean("estado"),
-                        new Frecuencia(
-                                rs.getInt("id_frecuencia"),
-                                rs.getString("desc_frecuencia")
-                        )
-                );
-                lista.add(rec);
+                lista.add(mapearRecordatorio(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return lista;
+    }
+
+    private Recordatorio mapearRecordatorio(ResultSet rs) throws SQLException {
+        return new Recordatorio(
+                rs.getInt("id_recordatorio"),
+                rs.getInt("id_instancia"),
+                rs.getString("titulo"),
+                rs.getTimestamp("fec_hora").toLocalDateTime(),
+                rs.getString("tipo"),
+                rs.getBoolean("estado"),
+                new Frecuencia(
+                        rs.getInt("id_frecuencia"),
+                        rs.getString("desc_frecuencia")
+                )
+        );
     }
 }

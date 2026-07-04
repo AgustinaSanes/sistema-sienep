@@ -58,17 +58,54 @@ public class InstitucionControlador {
                 return;
             }
 
-            System.out.println("Nombre actual: " + itr.getNombre());
-            System.out.print("Nuevo nombre: ");
-            itr.setNombre(sc.nextLine());
+            int opcion;
+            do {
+                System.out.println("--- ¿QUÉ DESEA MODIFICAR? ---");
+                System.out.println("1. Nombre        [" + itr.getNombre() + "]");
+                System.out.println("2. Calle         [" + itr.getCalle() + "]");
+                System.out.println("3. Número puerta [" + itr.getNroPuerta() + "]");
+                System.out.println("4. Ciudad        [" + itr.getCiudad() + "]");
+                System.out.println("5. Departamento  [" + itr.getDepartamento() + "]");
+                System.out.println("6. Teléfono      [" + itr.getTelefono() + "]");
+                System.out.println("0. Guardar y volver");
+                System.out.print("Opción: ");
 
-            System.out.println("Calle actual: " + itr.getCalle());
-            System.out.print("Nueva calle: ");
-            itr.setCalle(sc.nextLine());
+                try {
+                    opcion = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e) {
+                    opcion = -1;
+                }
 
-            System.out.println("Teléfono actual: " + itr.getTelefono());
-            System.out.print("Nuevo teléfono: ");
-            itr.setTelefono(sc.nextLine());
+                switch (opcion) {
+                    case 1 -> {
+                        System.out.print("Nuevo nombre: ");
+                        itr.setNombre(sc.nextLine());
+                    }
+                    case 2 -> {
+                        System.out.print("Nueva calle: ");
+                        itr.setCalle(sc.nextLine());
+                    }
+                    case 3 -> {
+                        System.out.print("Nuevo número puerta: ");
+                        itr.setNroPuerta(sc.nextLine());
+                    }
+                    case 4 -> {
+                        System.out.print("Nueva ciudad: ");
+                        itr.setCiudad(sc.nextLine());
+                    }
+                    case 5 -> {
+                        System.out.print("Nuevo departamento: ");
+                        itr.setDepartamento(sc.nextLine());
+                    }
+                    case 6 -> {
+                        System.out.print("Nuevo teléfono: ");
+                        itr.setTelefono(sc.nextLine());
+                    }
+                    case 0 -> System.out.println("Guardando...");
+                    default -> System.out.println("Opción inválida");
+                }
+
+            } while (opcion != 0);
 
             itrService.actualizarITR(itr);
             System.out.println("ITR actualizado correctamente");

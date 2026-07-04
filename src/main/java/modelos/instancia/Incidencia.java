@@ -13,7 +13,10 @@ public class Incidencia extends Instancia{
     private String lugar;
 
     //Constructores
-    public Incidencia(){super();}
+    public Incidencia() {
+        super();
+        this.involucrados = new ArrayList<>();
+    }
 
     public Incidencia(int id, boolean comConfidencial, String titulo, LocalDateTime fechaHora, String comentario,boolean estado,Estudiante estudiante, Funcionario funcionario, String lugar){
         super(id,comConfidencial,titulo,fechaHora,comentario,estado,estudiante,funcionario);

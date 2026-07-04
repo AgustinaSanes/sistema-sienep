@@ -13,11 +13,11 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
     }
 
     @Override
-    public void agregarInvolucrado(int idIncidencia, String involucrado) {
-        String sql = "INSERT INTO involucrados (id_incidencia, involucrado) VALUES (?, ?)";
+    public void agregarInvolucrado(int idInstancia, String involucrado) {
+        String sql = "INSERT INTO involucrados (id_instancia, involucrado) VALUES (?, ?)";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, idIncidencia);
+            ps.setInt(1, idInstancia);
             ps.setString(2, involucrado);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -26,11 +26,27 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
     }
 
     @Override
-    public void eliminarPorIncidencia(int idIncidencia) {
-        String sql = "DELETE FROM involucrados WHERE id_incidencia = ?";
+    public void eliminarInvolucrado(int idInstancia, String involucrado) {
+
+        String sql = "DELETE FROM involucrados WHERE id_instancia = ? AND involucrado = ?";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, idIncidencia);
+            ps.setInt(1, idInstancia);
+            ps.setString(2, involucrado);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void eliminarPorIncidencia(int idInstancia) {
+        String sql = "DELETE FROM involucrados WHERE id_instancia = ?";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idInstancia);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -38,12 +54,12 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
     }
 
     @Override
-    public List<String> obtenerPorIncidencia(int idIncidencia) {
+    public List<String> obtenerPorIncidencia(int idInstancia) {
         List<String> lista = new ArrayList<>();
-        String sql = "SELECT involucrado FROM involucrados WHERE id_incidencia = ?";
+        String sql = "SELECT involucrado FROM involucrados WHERE id_instancia = ?";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, idIncidencia);
+            ps.setInt(1, idInstancia);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {

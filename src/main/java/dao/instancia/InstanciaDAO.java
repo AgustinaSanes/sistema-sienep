@@ -10,4 +10,5 @@ public interface InstanciaDAO {
     void eliminarInstancia(int id);
     Instancia obtenerPorId(int id);
     List<Instancia> obtenerPorEstudiante(String cedula);
+    List<Instancia> obtenerPorCategoria(int idCategoria);
 }

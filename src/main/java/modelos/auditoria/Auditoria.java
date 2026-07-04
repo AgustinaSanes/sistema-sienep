@@ -26,8 +26,5 @@ public class Auditoria {
     //Setters
     public void setId(int id){this.id=id;}
     public void setCedula(String cedula){this.cedula=cedula;}
-    public void setAccion(String accion){this.accion=accion;}
-    public void setDetalle(String detalle){this.detalle=detalle;}
     public void setFechaHora(LocalDateTime fechaHora){this.fechaHora=fechaHora;}
-    public void setEntidadAfectada(String entidadAfectada){this.entidadAfectada=entidadAfectada;}
 }

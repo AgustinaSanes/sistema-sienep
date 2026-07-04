@@ -77,4 +77,11 @@ public class InstanciaService {
         }
         return instanciaDAO.obtenerPorEstudiante(cedula);
     }
+
+    public List<Instancia> obtenerPorCategoria(int idCategoria) {
+        if (idCategoria <= 0) {
+            throw new RuntimeException("ID de categoría inválido");
+        }
+        return instanciaDAO.obtenerPorCategoria(idCategoria);
+    }
 }

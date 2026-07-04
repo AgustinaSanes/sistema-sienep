@@ -26,12 +26,16 @@ public class TelefonoDAOImpl implements TelefonoDAO {
     }
 
     @Override
-    public void eliminarTelefono(int id) {
-        String sql = "DELETE FROM telefonos WHERE id_telefono = ?";
+    public void eliminarTelefono(String cedula, String numero) {
+
+        String sql = "DELETE FROM telefonos WHERE cedula = ? AND numero = ?";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, id);
+            ps.setString(1, cedula);
+            ps.setString(2, numero);
+
             ps.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

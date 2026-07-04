@@ -1,5 +1,5 @@
 package modelos.usuario;
-import modelos.archivo.InformeAdjunto;
+import modelos.informe.InformeAdjunto;
 import modelos.institucion.Grupo;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +25,7 @@ public class Estudiante extends Usuario {
     //Constructores
     public Estudiante(){
         super();
+        this.telefono=new ArrayList<>();
     }
 
     public Estudiante(String cedula, String nombre, String apellido, String email, String contrasena, boolean estado, Rol rol, String foto,String sistemaSalud,LocalDate fechaNacimiento, String calle, String nroPuerta, boolean obsConfidenciales,String motivo,String obsComentarios,String infoEstadoSalud){

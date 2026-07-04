@@ -27,7 +27,7 @@ public class Rol {
 
         roles.add(new Rol(1, "Administrador", true));
         roles.add(new Rol(2, "Analista de Equipo Educativo", true));
-        roles.add(new Rol(3, "Psicopedagogo/a", true));
+        roles.add(new Rol(3, "Psicopedagogo", true));
         roles.add(new Rol(4, "Estudiante", true));
         roles.add(new Rol(5, "Funcionario UTEC", true));
 

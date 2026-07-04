@@ -3,6 +3,7 @@ package dao.usuario;
 import conexionDB.ConexionBDSingleton;
 import modelos.usuario.Estudiante;
 import modelos.usuario.Rol;
+import dao.institucion.GrupoDAOImpl;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -220,7 +221,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
     }
 
     private Estudiante mapearEstudiante(ResultSet rs) throws SQLException{
-        return new Estudiante(
+        Estudiante estudiante = new Estudiante(
                 rs.getString("cedula"),
                 rs.getString("nombre"),
                 rs.getString("apellido"),
@@ -243,5 +244,8 @@ public class EstudianteDAOImpl implements EstudianteDAO {
                 rs.getString("obs_comentarios"),
                 rs.getString("inf_esta_salud")
         );
+        GrupoDAOImpl grupoDAO = new GrupoDAOImpl();
+        estudiante.setGrupo(grupoDAO.obtenerPorId(rs.getInt("id_grupo")));
+        return estudiante;
     }
 }

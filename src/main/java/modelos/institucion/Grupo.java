@@ -7,6 +7,8 @@ public class Grupo {
     private Carrera carrera;
 
     //Constructor
+    public Grupo(){}
+
     public Grupo(int id,String nombre,boolean estado,Carrera carrera){
         this.id=id;
         this.nombre=nombre;

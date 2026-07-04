@@ -1,7 +1,8 @@
 package controlador;
 
-import factory.Reporte;
-import factory.ReporteFactory;
+import factory.factoryMethod.exportador.*;
+import factory.factoryMethod.reporte.Reporte;
+import factory.factoryMethod.reporte.ReporteFactory;
 
 import java.util.Scanner;
 
@@ -15,7 +16,8 @@ public class ReporteControlador {
             String cedula = sc.nextLine();
 
             Reporte reporte = ReporteFactory.crearReporte("estudiante");
-            reporte.generar(cedula);
+            String contenido = reporte.generar(cedula);
+            reporteSalida(contenido);
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -24,10 +26,52 @@ public class ReporteControlador {
 
     public void reporteGeneral() {
         try {
+            System.out.print("Filtrar por rol (Enter para mostrar todos): ");
+            String filtroRol = sc.nextLine();
+
             Reporte reporte = ReporteFactory.crearReporte("general");
-            reporte.generar("");
+            String contenido = reporte.generar(filtroRol);
+
+            reporteSalida(contenido);
+
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    private void reporteSalida(String contenido) {
+
+        int opcion;
+
+        do {
+            System.out.println("--- SALIDA DEL REPORTE ---");
+            System.out.println("1. Ver en pantalla");
+            System.out.println("2. Exportar a PDF");
+            System.out.println("3. Exportar a CSV");
+            System.out.println("4. Exportar a Excel");
+            System.out.println("0. Volver");
+            System.out.print("Opción: ");
+
+            try {
+                opcion = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                opcion = -1;
+            }
+
+            switch (opcion) {
+                case 1 -> System.out.println(contenido);
+                case 2 -> exportar(new PDFExportadorFactory(), contenido);
+                case 3 -> exportar(new CSVExportadorFactory(), contenido);
+                case 4 -> exportar(new ExcelExportadorFactory(), contenido);
+                case 0 -> System.out.println("Volviendo...");
+                default -> System.out.println("Opción inválida");
+            }
+
+        } while (opcion != 0);
+    }
+
+    private void exportar(ExportadorFactory factory, String datos) {
+        Exportador exportador = factory.crearExportador();
+        exportador.exportar(datos);
     }
 }

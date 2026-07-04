@@ -1,6 +1,6 @@
 package controlador;
 
-import factory.UsuarioFactory;
+import factory.abstractFactory.UsuarioFactory;
 import modelos.usuario.*;
 import proxy.PermisosProxy;
 import servicios.usuario.RolService;
@@ -39,10 +39,8 @@ public class FuncionarioControlador {
             System.out.println("--- ROLES DISPONIBLES ---");
 
             for (Rol r : roles) {
-                if (r.isEstado()) {
-                    System.out.println(
-                            r.getId() + ". " + r.getNombre()
-                    );
+                if (r.isEstado() && !r.getNombre().equalsIgnoreCase("Estudiante")) {
+                    System.out.println(r.getId() + ". " + r.getNombre());
                 }
             }
 
@@ -52,7 +50,7 @@ public class FuncionarioControlador {
                     Integer.parseInt(sc.nextLine())
             );
 
-            if (rol == null || !rol.isEstado()) {
+            if (rol == null || !rol.isEstado() || rol.getNombre().equalsIgnoreCase("Estudiante")) {
                 System.out.println("Rol inválido");
                 return;
             }
@@ -91,25 +89,48 @@ public class FuncionarioControlador {
                 return;
             }
 
-            System.out.println("Nombre actual: " + usuario.getNombre());
-            System.out.print("Nuevo nombre: ");
-            usuario.setNombre(sc.nextLine());
+            int opcion;
+            do {
+                System.out.println("--- ¿QUÉ DESEA MODIFICAR? ---");
+                System.out.println("1. Nombre    [" + usuario.getNombre() + "]");
+                System.out.println("2. Apellido  [" + usuario.getApellido() + "]");
+                System.out.println("3. Email     [" + usuario.getEmail() + "]");
+                System.out.println("0. Guardar y volver");
+                System.out.print("Opción: ");
 
-            System.out.println("Apellido actual: " + usuario.getApellido());
-            System.out.print("Nuevo apellido: ");
-            usuario.setApellido(sc.nextLine());
+                try {
+                    opcion = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e) {
+                    opcion = -1;
+                }
 
-            System.out.println("Email actual: " + usuario.getEmail());
-            System.out.print("Nuevo email: ");
-            usuario.setEmail(sc.nextLine());
+                switch (opcion) {
+                    case 1 -> {
+                        System.out.print("Nuevo nombre: ");
+                        usuario.setNombre(sc.nextLine());
+                    }
+                    case 2 -> {
+                        System.out.print("Nuevo apellido: ");
+                        usuario.setApellido(sc.nextLine());
+                    }
+                    case 3 -> {
+                        System.out.print("Nuevo email: ");
+                        usuario.setEmail(sc.nextLine());
+                    }
+                    case 0 -> System.out.println("Guardando...");
+                    default -> System.out.println("Opción inválida");
+                }
+
+            } while (opcion != 0);
 
             proxy.modificarUsuario(usuario);
-            System.out.println("Datos actualizados correctamente");
+            System.out.println("Funcionario actualizado correctamente");
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
 
     public void desactivarFuncionario() {
         try {

@@ -1,4 +1,4 @@
-package consola;
+package consola.Menu;
 import modelos.usuario.*;
 
 public interface MenuSistema {

@@ -1,7 +1,9 @@
 package servicios.usuario;
-import dao.usuario.AuditoriaDAO;
-import dao.usuario.AuditoriaDAOImpl;
+import dao.auditoria.AuditoriaDAO;
+import dao.auditoria.AuditoriaDAOImpl;
 import modelos.auditoria.Auditoria;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class AuditoriaService {
@@ -29,5 +31,12 @@ public class AuditoriaService {
             throw new RuntimeException("Cédula inválida");
         }
         return auditoriaDAO.obtenerPorCedula(cedula);
+    }
+    // Obtener auditorías por fecha
+    public List<Auditoria> obtenerPorFecha(LocalDate fecha) {
+        if (fecha == null) {
+            throw new RuntimeException("Fecha inválida");
+        }
+        return auditoriaDAO.obtenerPorFecha(fecha);
     }
 }

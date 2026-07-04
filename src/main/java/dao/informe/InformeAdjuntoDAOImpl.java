@@ -1,6 +1,6 @@
-package dao.archivo;
+package dao.informe;
 import conexionDB.ConexionBDSingleton;
-import modelos.archivo.InformeAdjunto;
+import modelos.informe.InformeAdjunto;
 import modelos.usuario.Estudiante;
 import java.sql.*;
 import java.util.*;
@@ -14,7 +14,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
     }
 
     @Override
-    public void agregarArchivo(InformeAdjunto informe) {
+    public void agregarInforme(InformeAdjunto informe) {
         String sql = "INSERT INTO info_adjuntos " +
                 "(cedula, nom_archivo, tip_archivo, rut_archivo, categoria, confidencial) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
@@ -33,7 +33,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
     }
 
     @Override
-    public void actualizarArchivo(InformeAdjunto informe) {
+    public void actualizarInforme(InformeAdjunto informe) {
         String sql = "UPDATE info_adjuntos SET " +
                 "nom_archivo=?, tip_archivo=?, rut_archivo=?, categoria=?, confidencial=? " +
                 "WHERE id_informe=?";
@@ -52,7 +52,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
     }
 
     @Override
-    public void eliminarArchivo(int id) {
+    public void eliminarInforme(int id) {
         String sql = "UPDATE info_adjuntos SET estado = false WHERE id_informe = ?";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {

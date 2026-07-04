@@ -1,8 +1,11 @@
 package servicios.autenticacion;
 
 import conexionDB.ConexionBDSingleton;
+import modelos.usuario.Estudiante;
+import modelos.usuario.Funcionario;
 import modelos.usuario.Rol;
 import modelos.usuario.Usuario;
+import servicios.usuario.UsuarioService;
 import util.EncriptarContra;
 
 import java.sql.Connection;
@@ -10,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class AutenticacionService {
-
     private final Connection conexion;
 
     public AutenticacionService() {
@@ -48,7 +50,14 @@ public class AutenticacionService {
             );
 
             // construir usuario
-            Usuario u = new Usuario() {};
+            String nomRol = rs.getString("nom_rol");
+            Usuario u;
+
+            if ("Estudiante".equalsIgnoreCase(nomRol)) {
+                u = new Estudiante();
+            } else {
+                u = new Funcionario();
+            }
 
             u.setCedula(rs.getString("cedula"));
             u.setNombre(rs.getString("nombre"));

@@ -34,20 +34,31 @@ public class RecordatorioControlador {
             System.out.print("Título: ");
             String titulo = sc.nextLine();
 
-            System.out.print("Fecha y hora (YYYY-MM-DDTHH:MM): ");
-            LocalDateTime fechaHora = LocalDateTime.parse(sc.nextLine());
+            System.out.print("Fecha (YYYY-MM-DD): ");
+            String fecha = sc.nextLine().trim();
+
+            System.out.print("Hora (HH:MM): ");
+            String hora = sc.nextLine().trim();
+
+            LocalDateTime fechaHora;
+            try {
+                fechaHora = LocalDateTime.parse(fecha + "T" + hora);
+            } catch (Exception e) {
+                System.out.println("Formato inválido. Use fecha YYYY-MM-DD y hora HH:MM");
+                return;
+            }
 
             // TIPO
             System.out.println("--- TIPO ---");
-            System.out.println("1. llamada");
-            System.out.println("2. reunion");
-            System.out.println("3. tarea administrativa");
+            System.out.println("1. Llamada");
+            System.out.println("2. Reunion");
+            System.out.println("3. Tarea administrativa");
             System.out.print("Seleccione tipo: ");
             int opTipo = Integer.parseInt(sc.nextLine());
             String tipo = switch (opTipo) {
-                case 1 -> "llamada";
-                case 2 -> "reunion";
-                case 3 -> "tarea administrativa";
+                case 1 -> "Llamada";
+                case 2 -> "Reunion";
+                case 3 -> "Tarea administrativa";
                 default -> throw new RuntimeException("Tipo inválido");
             };
 
@@ -67,11 +78,14 @@ public class RecordatorioControlador {
             }
 
             Recordatorio recordatorio = new Recordatorio(
-                    0, titulo, fechaHora, tipo, true, frecuencia
+                    0, idInstancia, titulo, fechaHora, tipo, true, frecuencia
             );
 
             recordatorioService.agregarRecordatorio(recordatorio);
             System.out.println("Recordatorio creado correctamente");
+
+            notificarRecordatorio(instancia, recordatorio);
+            notificarRecordatorioCreador(instancia, recordatorio);
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -82,25 +96,65 @@ public class RecordatorioControlador {
         try {
             System.out.println("--- MODIFICAR RECORDATORIO ---");
 
-            System.out.print("ID de recordatorio: ");
+            System.out.print("Ingrese ID del recordatorio: ");
             int id = Integer.parseInt(sc.nextLine());
 
             Recordatorio r = recordatorioService.obtenerPorId(id);
+
             if (r == null) {
                 System.out.println("Recordatorio no encontrado");
                 return;
             }
 
-            System.out.println("Título actual: " + r.getTitulo());
-            System.out.print("Nuevo título: ");
-            r.setTitulo(sc.nextLine());
+            int opcion;
+            boolean fechaModificada = false;
 
-            System.out.println("Fecha actual: " + r.getFechaHora());
-            System.out.print("Nueva fecha (YYYY-MM-DDTHH:MM): ");
-            r.setFechaHora(LocalDateTime.parse(sc.nextLine()));
+            do {
+                System.out.println("--- ¿QUÉ DESEA MODIFICAR? ---");
+                System.out.println("1. Título      [" + r.getTitulo() + "]");
+                System.out.println("2. Fecha/Hora  [" + r.getFechaHora() + "]");
+                System.out.println("0. Guardar y volver");
+                System.out.print("Opción: ");
+
+                try {
+                    opcion = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e) {
+                    opcion = -1;
+                }
+
+                switch (opcion) {
+                    case 1 -> {
+                        System.out.print("Nuevo título: ");
+                        r.setTitulo(sc.nextLine());
+                    }
+                    case 2 -> {
+                        System.out.print("Nueva fecha (YYYY-MM-DD): ");
+                        String fecha = sc.nextLine().trim();
+                        System.out.print("Nueva hora (HH:MM): ");
+                        String hora = sc.nextLine().trim();
+                        try {
+                            r.setFechaHora(LocalDateTime.parse(fecha + "T" + hora));
+                            fechaModificada = true;
+                        } catch (Exception e) {
+                            System.out.println("Formato inválido. Use fecha YYYY-MM-DD y hora HH:MM");
+                        }
+                    }
+                    case 0 -> System.out.println("Guardando...");
+                    default -> System.out.println("Opción inválida");
+                }
+
+            } while (opcion != 0);
 
             recordatorioService.actualizarRecordatorio(r);
             System.out.println("Recordatorio actualizado correctamente");
+
+            if (fechaModificada) {
+                Instancia instancia = proxy.obtenerInstanciaPorId(r.getIdInstancia());
+                if (instancia != null) {
+                    notificarCambioRecordatorio(instancia, r);
+                    notificarCambioRecordatorioCreador(instancia, r);
+                }
+            }
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -164,6 +218,64 @@ public class RecordatorioControlador {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    // --- Notificación del recordatorio al estudiante de la instancia (Factory Method) ---
+    private void notificarRecordatorio(Instancia instancia, Recordatorio recordatorio) {
+
+        if (instancia.getEstudiante() == null) {
+            return;
+        }
+
+        String mensaje = "Estimado/a " + instancia.getEstudiante().getNombre() + " "
+                + instancia.getEstudiante().getApellido()
+                + ", tiene un recordatorio (\"" + recordatorio.getTitulo() + "\") programado para "
+                + recordatorio.getFechaHora() + " asociado a la instancia N° " + instancia.getId() + ".";
+
+        NotificacionHelper.notificar(sc, mensaje, "NOTIFICAR AL ESTUDIANTE");
+    }
+
+    private void notificarRecordatorioCreador(Instancia instancia, Recordatorio recordatorio) {
+
+        if (instancia.getFuncionario() == null) {
+            return;
+        }
+
+        String mensaje = "Estimado/a " + instancia.getFuncionario().getNombre() + " "
+                + instancia.getFuncionario().getApellido()
+                + ", se registró el recordatorio (\"" + recordatorio.getTitulo() + "\") para "
+                + recordatorio.getFechaHora() + " asociado a la instancia N° " + instancia.getId() + ".";
+
+        NotificacionHelper.notificar(sc, mensaje, "NOTIFICAR AL FUNCIONARIO (CREADOR)");
+    }
+
+    // --- Notificación de reprogramación del recordatorio (Factory Method) ---
+    private void notificarCambioRecordatorio(Instancia instancia, Recordatorio recordatorio) {
+
+        if (instancia.getEstudiante() == null) {
+            return;
+        }
+
+        String mensaje = "Estimado/a " + instancia.getEstudiante().getNombre() + " "
+                + instancia.getEstudiante().getApellido()
+                + ", el recordatorio (\"" + recordatorio.getTitulo() + "\") de la instancia N° "
+                + instancia.getId() + " fue reprogramado para " + recordatorio.getFechaHora() + ".";
+
+        NotificacionHelper.notificar(sc, mensaje, "NOTIFICAR AL ESTUDIANTE");
+    }
+
+    private void notificarCambioRecordatorioCreador(Instancia instancia, Recordatorio recordatorio) {
+
+        if (instancia.getFuncionario() == null) {
+            return;
+        }
+
+        String mensaje = "Estimado/a " + instancia.getFuncionario().getNombre() + " "
+                + instancia.getFuncionario().getApellido()
+                + ", el recordatorio (\"" + recordatorio.getTitulo() + "\") de la instancia N° "
+                + instancia.getId() + " fue reprogramado para " + recordatorio.getFechaHora() + ".";
+
+        NotificacionHelper.notificar(sc, mensaje, "NOTIFICAR AL FUNCIONARIO (CREADOR)");
     }
 
     public void mostrarRecordatorio(Recordatorio r) {

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 //Clase Recordatorio
 public class Recordatorio {
     private int id;
+    private int idInstancia;
     private String titulo;
     private LocalDateTime fechaHora;
     private String tipo;
@@ -13,8 +14,9 @@ public class Recordatorio {
     //Constructores
     public Recordatorio() {}
 
-    public Recordatorio(int id,String titulo,LocalDateTime fechaHora,String tipo,boolean estado,Frecuencia frecuencia){
+    public Recordatorio(int id, int idInstancia, String titulo,LocalDateTime fechaHora,String tipo,boolean estado,Frecuencia frecuencia){
         this.id=id;
+        this.idInstancia=idInstancia;
         this.titulo=titulo;
         this.fechaHora=fechaHora;
         this.tipo=tipo;
@@ -24,6 +26,7 @@ public class Recordatorio {
 
     //Getters
     public int getId(){return id;}
+    public int getIdInstancia(){return idInstancia;}
     public String getTitulo(){return titulo;}
     public LocalDateTime getFechaHora(){return fechaHora;}
     public String getTipo(){return tipo;}
@@ -32,6 +35,7 @@ public class Recordatorio {
 
     //Setters
     public void setId(int id){this.id=id;}
+    public void setIdInstancia(int idInstancia){this.idInstancia=idInstancia;}
     public void setTitulo(String titulo){this.titulo=titulo;}
     public void setFechaHora(LocalDateTime fechaHora){this.fechaHora=fechaHora;}
     public void setTipo(String tipo){this.tipo=tipo;}
@@ -41,6 +45,7 @@ public class Recordatorio {
     @Override
     public String toString() {
         return "ID: " + id +
+                " | Instancia: " + idInstancia +
                 " | Titulo: " + titulo +
                 " | FechaHora: " + fechaHora +
                 " | Tipo: " + tipo +

@@ -1,7 +1,8 @@
-package dao.usuario;
+package dao.auditoria;
 import conexionDB.ConexionBDSingleton;
 import modelos.auditoria.Auditoria;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,21 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
         return lista;
     }
 
+    @Override
+    public List<Auditoria> obtenerPorFecha(LocalDate fecha) {
+        List<Auditoria> lista = new ArrayList<>();
+        String sql = "SELECT * FROM auditorias WHERE DATE(fec_hora) = ? ORDER BY fec_hora DESC";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) lista.add(mapearAuditoria(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
     private Auditoria mapearAuditoria(ResultSet rs) throws SQLException {
         Auditoria a = new Auditoria(
                 rs.getString("cedula"),
@@ -73,6 +89,7 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
                 rs.getString("ent_afectada")
         );
         a.setId(rs.getInt("id_auditoria"));
+        a.setFechaHora(rs.getTimestamp("fec_hora").toLocalDateTime());
         return a;
     }
 }

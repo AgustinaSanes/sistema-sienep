@@ -1,4 +1,4 @@
-package factory;
+package factory.factoryMethod.reporte;
 
 public class ReporteFactory {
     public static Reporte crearReporte(String tipo) {

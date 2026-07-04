@@ -21,7 +21,7 @@ public class AuditoriaObserver implements Observer {
         if (evento.contains("FUNCIONARIO")) return "funcionarios";
         if (evento.contains("INSTANCIA")) return "instancias";
         if (evento.contains("INCIDENCIA")) return "incidencias";
-        if (evento.contains("INFORME")) return "info_adjuntos";
+        if (evento.contains("INFORME")) return "informes_adjuntos";
         if (evento.contains("LOGIN")) return "usuarios";
         return "sistema";
     }

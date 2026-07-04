@@ -8,6 +8,7 @@ import java.util.*;
 public class PerfilControlador {
     private final RolService rolService = new RolService();
     private final PermisoService permisoService = new PermisoService();
+    private final RolPermisoService rolPermisoService = new RolPermisoService();
     private final Scanner sc = new Scanner(System.in);
 
     // ROLES
@@ -203,6 +204,74 @@ public class PerfilControlador {
             System.out.println("----------------");
             System.out.println("ID: " + p.getId());
             System.out.println("Descripción: " + p.getDescripcion());
+        }
+    }
+
+    public void asignarPermiso() {
+        try {
+
+            System.out.println("--- ASIGNAR PERMISO ---");
+
+            System.out.print("ID Rol: ");
+            int idRol = Integer.parseInt(sc.nextLine());
+
+            System.out.print("ID Permiso: ");
+            int idPermiso = Integer.parseInt(sc.nextLine());
+
+            rolPermisoService.asignarPermiso(idRol, idPermiso);
+
+            System.out.println("Permiso asignado correctamente");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public void quitarPermiso() {
+        try {
+            System.out.println("--- QUITAR PERMISO ---");
+
+            System.out.print("ID Rol: ");
+            int idRol = Integer.parseInt(sc.nextLine());
+
+            System.out.print("ID Permiso: ");
+            int idPermiso = Integer.parseInt(sc.nextLine());
+
+            rolPermisoService.quitarPermiso(idRol,idPermiso);
+
+            System.out.println("Permiso quitado correctamente");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public void obtenerPermisosRol() {
+        try {
+
+            System.out.println("--- PERMISOS DEL ROL ---");
+
+            System.out.print("ID Rol: ");
+            int idRol = Integer.parseInt(sc.nextLine());
+
+            List<Permiso> permisos =
+                    rolPermisoService.obtenerPermisosRol(idRol);
+
+            if(permisos.isEmpty()){
+                System.out.println("No hay permisos");
+                return;
+            }
+
+            for(Permiso p : permisos){
+
+                System.out.println("----------------");
+                System.out.println("ID: " + p.getId());
+                System.out.println("Descripción: "
+                        + p.getDescripcion());
+            }
+
+        } catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

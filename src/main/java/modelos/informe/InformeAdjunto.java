@@ -1,7 +1,7 @@
-package modelos.archivo;
+package modelos.informe;
 import modelos.usuario.Estudiante;
 
-//Clase InformeAdjunto
+//Clase Informe Adjunto
 public class InformeAdjunto {
     private int id;
     private String nombre;
@@ -14,7 +14,7 @@ public class InformeAdjunto {
     private Estudiante estudiante;
 
     //Constructor
-    public InformeAdjunto(int id,String nombre,String tipoArchivo,String rutaArchivo,String categoria,boolean confidencial,boolean estado,Estudiante estudiante){
+    public InformeAdjunto(int id, String nombre, String tipoArchivo, String rutaArchivo, String categoria, boolean confidencial, boolean estado, Estudiante estudiante){
         this.id=id;
         this.nombre=nombre;
         this.tipoArchivo=tipoArchivo;

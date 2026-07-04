@@ -22,6 +22,7 @@ public class EstudianteService {
         if (estudiante == null) {
             throw new RuntimeException("El estudiante no puede ser nulo");
         }
+
         // Cédula
         if (!ValidarCedula.esValida(estudiante.getCedula())) {
             throw new RuntimeException("Cédula inválida");
@@ -29,19 +30,19 @@ public class EstudianteService {
         // Sistema salud
         if (estudiante.getSistemaSalud() == null ||
                 estudiante.getSistemaSalud().trim().isEmpty()) {
-            throw new RuntimeException("Sistema de salud obligatorio");
+            throw new RuntimeException("El sistema de salud obligatorio");
         }
         if (estudiante.getSistemaSalud().length() > 50) {
-            throw new RuntimeException("Sistema de salud no debe superar los 50 caracteres");
+            throw new RuntimeException("El sistema de salud no debe superar los 50 caracteres");
         }
 
         // Fecha nacimiento
         if (estudiante.getFechaNacimiento() == null) {
-            throw new RuntimeException("Fecha de nacimiento obligatoria");
+            throw new RuntimeException("La fecha de nacimiento obligatoria");
         }
 
         if (!ValidarEdad.esMayorDeEdad(estudiante.getFechaNacimiento())) {
-            throw new RuntimeException("Debe ser mayor de edad");
+            throw new RuntimeException("El estudiante debe ser mayor de edad");
         }
         // Motivo
         if (estudiante.getMotivo() == null ||
@@ -49,7 +50,7 @@ public class EstudianteService {
             throw new RuntimeException("El motivo es obligatorio");
         }
         if (estudiante.getMotivo().length() > 250) {
-            throw new RuntimeException("Motivo demasiado largo");
+            throw new RuntimeException("El motivo no debe superar los 250 caracteres");
         }
         // Foto
         if (estudiante.getFoto() != null &&
@@ -69,7 +70,7 @@ public class EstudianteService {
         // Dirección
         if (estudiante.getCalle() != null &&
                 estudiante.getCalle().length() > 50) {
-            throw new RuntimeException("Calle no debe superar los 50 caracteres");
+            throw new RuntimeException("La calle no debe superar los 50 caracteres");
         }
         if (estudiante.getNroPuerta() != null &&
                 estudiante.getNroPuerta().length() > 50) {
