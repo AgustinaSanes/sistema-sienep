@@ -1,19 +1,30 @@
 package dao.instancia;
 
 import conexionDB.ConexionBDSingleton;
+import dao.usuario.EstudianteDAO;
+import dao.usuario.EstudianteDAOImpl;
+import dao.usuario.FuncionarioDAO;
+import dao.usuario.FuncionarioDAOImpl;
 import modelos.instancia.Incidencia;
 import modelos.instancia.Instancia;
 import modelos.instancia.InstanciaComun;
+import modelos.instancia.Categoria;
+import dao.instancia.InvolucradoDAO;
+import dao.instancia.InvolucradoDAOImpl;
 import modelos.usuario.Estudiante;
 import modelos.usuario.Funcionario;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InstanciaDAOImpl implements InstanciaDAO {
 
     private final Connection c;
+    private final EstudianteDAO estudianteDAO = new EstudianteDAOImpl();
+    private final FuncionarioDAO funcionarioDAO = new FuncionarioDAOImpl();
+    private final InvolucradoDAO involucradoDAO = new InvolucradoDAOImpl();
 
     public InstanciaDAOImpl() {
         this.c = ConexionBDSingleton.getInstancia().getConexion();
@@ -45,7 +56,7 @@ public class InstanciaDAOImpl implements InstanciaDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -68,7 +79,7 @@ public class InstanciaDAOImpl implements InstanciaDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -84,17 +95,18 @@ public class InstanciaDAOImpl implements InstanciaDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public Instancia obtenerPorId(int id) {
         String sql =
-                "SELECT i.*, inc.lugar, com.id_categoria " +
+                "SELECT i.*, inc.lugar, com.id_categoria, cat.nombre AS cat_nombre, cat.estado AS cat_estado " +
                         "FROM instancias i " +
                         "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
                         "LEFT JOIN inst_comunes com ON i.id_instancia = com.id_instancia " +
+                        "LEFT JOIN categorias cat ON com.id_categoria = cat.id_categoria " +
                         "WHERE i.id_instancia = ? AND i.estado = true";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -102,16 +114,14 @@ public class InstanciaDAOImpl implements InstanciaDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                Estudiante estudiante = new Estudiante();
-                estudiante.setCedula(rs.getString("ced_estudiante"));
+                Estudiante estudiante = estudianteDAO.obtenerPorCedula(rs.getString("ced_estudiante"));
 
-                Funcionario funcionario = new Funcionario();
-                funcionario.setCedula(rs.getString("ced_funcionario"));
+                Funcionario funcionario = funcionarioDAO.obtenerPorCedula(rs.getString("ced_funcionario"));
 
                 String lugar = rs.getString("lugar");
 
                 if (lugar != null) {
-                    return new Incidencia(
+                    Incidencia inc = new Incidencia(
                             rs.getInt("id_instancia"),
                             rs.getBoolean("com_confidencial"),
                             rs.getString("titulo"),
@@ -122,7 +132,14 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                             funcionario,
                             lugar
                     );
+                    for (String inv : involucradoDAO.obtenerPorIncidencia(inc.getId())) {
+                        inc.agregarInvolucrado(inv);
+                    }
+                    return inc;
                 } else {
+                    int idCategoria = rs.getInt("id_categoria");
+                    Categoria categoria = rs.wasNull() ? null
+                            : new Categoria(idCategoria, rs.getString("cat_nombre"), rs.getBoolean("cat_estado"));
                     return new InstanciaComun(
                             rs.getInt("id_instancia"),
                             rs.getBoolean("com_confidencial"),
@@ -132,12 +149,12 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                             rs.getBoolean("estado"),
                             estudiante,
                             funcionario,
-                            null
+                            categoria
                     );
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -149,18 +166,17 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                 "SELECT i.*, inc.lugar " +
                         "FROM instancias i " +
                         "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
-                        "WHERE i.ced_estudiante = ? AND i.estado = true";
+                        "WHERE i.ced_estudiante = ? AND i.estado = true " +
+                        "ORDER BY i.fec_hora DESC";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, cedula);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Estudiante estudiante = new Estudiante();
-                estudiante.setCedula(rs.getString("ced_estudiante"));
+                Estudiante estudiante = estudianteDAO.obtenerPorCedula(rs.getString("ced_estudiante"));
 
-                Funcionario funcionario = new Funcionario();
-                funcionario.setCedula(rs.getString("ced_funcionario"));
+                Funcionario funcionario = funcionarioDAO.obtenerPorCedula(rs.getString("ced_funcionario"));
 
                 String lugar = rs.getString("lugar");
                 Instancia inst;
@@ -177,6 +193,9 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                             funcionario,
                             lugar
                     );
+                    for (String inv : involucradoDAO.obtenerPorIncidencia(inst.getId())) {
+                        ((Incidencia) inst).agregarInvolucrado(inv);
+                    }
                 } else {
                     inst = new InstanciaComun(
                             rs.getInt("id_instancia"),
@@ -193,7 +212,7 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                 lista.add(inst);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -202,21 +221,22 @@ public class InstanciaDAOImpl implements InstanciaDAO {
     public List<Instancia> obtenerPorCategoria(int idCategoria) {
         List<Instancia> lista = new ArrayList<>();
         String sql =
-                "SELECT i.* " +
+                "SELECT i.*, ic.id_categoria " +
                         "FROM instancias i " +
                         "JOIN inst_comunes ic ON i.id_instancia = ic.id_instancia " +
-                        "WHERE ic.id_categoria = ? AND i.estado = true";
+                        "WHERE ic.id_categoria = ? AND i.estado = true " +
+                        "ORDER BY i.fec_hora DESC";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idCategoria);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Estudiante estudiante = new Estudiante();
-                estudiante.setCedula(rs.getString("ced_estudiante"));
+                Estudiante estudiante = estudianteDAO.obtenerPorCedula(rs.getString("ced_estudiante"));
 
-                Funcionario funcionario = new Funcionario();
-                funcionario.setCedula(rs.getString("ced_funcionario"));
+                Funcionario funcionario = funcionarioDAO.obtenerPorCedula(rs.getString("ced_funcionario"));
+
+                Categoria categoria = new Categoria(rs.getInt("id_categoria"), null, true);
 
                 InstanciaComun inst = new InstanciaComun(
                         rs.getInt("id_instancia"),
@@ -227,13 +247,160 @@ public class InstanciaDAOImpl implements InstanciaDAO {
                         rs.getBoolean("estado"),
                         estudiante,
                         funcionario,
-                        null
+                        categoria
                 );
                 lista.add(inst);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
+        return lista;
+    }
+    @Override
+    public List<Instancia> buscarPorFecha(LocalDate fecha) {
+
+        List<Instancia> lista = new ArrayList<>();
+
+        String sql =
+                "SELECT i.*, inc.lugar, com.id_categoria " +
+                        "FROM instancias i " +
+                        "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
+                        "LEFT JOIN inst_comunes com ON i.id_instancia = com.id_instancia " +
+                        "WHERE DATE(i.fec_hora) = ? AND i.estado = true " +
+                        "ORDER BY i.fec_hora DESC";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(fecha));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Estudiante estudiante = estudianteDAO.obtenerPorCedula(rs.getString("ced_estudiante"));
+
+                Funcionario funcionario = funcionarioDAO.obtenerPorCedula(rs.getString("ced_funcionario"));
+
+                String lugar = rs.getString("lugar");
+                Instancia inst;
+
+                if (lugar != null) {
+
+                    inst = new Incidencia(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            lugar
+                    );
+                    for (String inv : involucradoDAO.obtenerPorIncidencia(inst.getId())) {
+                        ((Incidencia) inst).agregarInvolucrado(inv);
+                    }
+
+                } else {
+
+                    int idCategoria = rs.getInt("id_categoria");
+                    Categoria categoria = rs.wasNull() ? null : new Categoria(idCategoria, null, true);
+
+                    inst = new InstanciaComun(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            categoria
+                    );
+
+                }
+
+                lista.add(inst);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
+        }
+
+        return lista;
+    }
+
+    @Override
+    public List<Instancia> buscarPorDescripcion(String descripcion) {
+
+        List<Instancia> lista = new ArrayList<>();
+
+        String sql =
+                "SELECT i.*, inc.lugar, com.id_categoria " +
+                        "FROM instancias i " +
+                        "LEFT JOIN incidencias inc ON i.id_instancia = inc.id_instancia " +
+                        "LEFT JOIN inst_comunes com ON i.id_instancia = com.id_instancia " +
+                        "WHERE i.titulo ILIKE ? AND i.estado = true " +
+                        "ORDER BY i.titulo";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + descripcion + "%");
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Estudiante estudiante = estudianteDAO.obtenerPorCedula(rs.getString("ced_estudiante"));
+
+                Funcionario funcionario = funcionarioDAO.obtenerPorCedula(rs.getString("ced_funcionario"));
+
+                String lugar = rs.getString("lugar");
+                Instancia inst;
+
+                if (lugar != null) {
+
+                    inst = new Incidencia(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            lugar
+                    );
+                    for (String inv : involucradoDAO.obtenerPorIncidencia(inst.getId())) {
+                        ((Incidencia) inst).agregarInvolucrado(inv);
+                    }
+
+                } else {
+
+                    int idCategoria = rs.getInt("id_categoria");
+                    Categoria categoria = rs.wasNull() ? null : new Categoria(idCategoria, null, true);
+
+                    inst = new InstanciaComun(
+                            rs.getInt("id_instancia"),
+                            rs.getBoolean("com_confidencial"),
+                            rs.getString("titulo"),
+                            rs.getTimestamp("fec_hora").toLocalDateTime(),
+                            rs.getString("comentario"),
+                            rs.getBoolean("estado"),
+                            estudiante,
+                            funcionario,
+                            categoria
+                    );
+
+                }
+
+                lista.add(inst);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
+        }
+
         return lista;
     }
 }

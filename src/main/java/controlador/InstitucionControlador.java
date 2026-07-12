@@ -1,16 +1,19 @@
 package controlador;
 
 import modelos.institucion.*;
-import servicios.institucion.*;
+import proxy.PermisosProxy;
+import util.EntradaHelper;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class InstitucionControlador {
-    private final ITRService itrService = new ITRService();
-    private final CarreraService carreraService = new CarreraService();
-    private final GrupoService grupoService = new GrupoService();
+    private final PermisosProxy proxy;
     private final Scanner sc = new Scanner(System.in);
+
+    public InstitucionControlador(PermisosProxy proxy) {
+        this.proxy = proxy;
+    }
 
     // ITRs
     public void crearITR() {
@@ -37,7 +40,7 @@ public class InstitucionControlador {
 
             ITR itr = new ITR(0, nombre, calle, nroPuerta, ciudad, departamento, telefono, true);
 
-            itrService.agregarITR(itr);
+            proxy.agregarITR(itr);
             System.out.println("ITR creado correctamente");
 
         } catch (Exception e) {
@@ -50,9 +53,10 @@ public class InstitucionControlador {
             System.out.println("--- MODIFICAR ITR ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (id == null) return;
 
-            ITR itr = itrService.obtenerPorId(id);
+            ITR itr = proxy.obtenerITRPorId(id);
             if (itr == null) {
                 System.out.println("ITR no encontrado");
                 return;
@@ -107,7 +111,7 @@ public class InstitucionControlador {
 
             } while (opcion != 0);
 
-            itrService.actualizarITR(itr);
+            proxy.actualizarITR(itr);
             System.out.println("ITR actualizado correctamente");
 
         } catch (Exception e) {
@@ -120,9 +124,10 @@ public class InstitucionControlador {
             System.out.println("--- DESACTIVAR ITR ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (id == null) return;
 
-            itrService.eliminarITR(id);
+            proxy.eliminarITR(id);
             System.out.println("ITR desactivado correctamente");
 
         } catch (Exception e) {
@@ -135,9 +140,10 @@ public class InstitucionControlador {
             System.out.println("--- BUSCAR ITR ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (id == null) return;
 
-            ITR itr = itrService.obtenerPorId(id);
+            ITR itr = proxy.obtenerITRPorId(id);
             if (itr == null) {
                 System.out.println("ITR no encontrado");
                 return;
@@ -159,7 +165,7 @@ public class InstitucionControlador {
 
     public void listarITRs() {
         try {
-            List<ITR> itrs = itrService.obtenerTodos();
+            List<ITR> itrs = proxy.listarITRs();
 
             if (itrs.isEmpty()) {
                 System.out.println("No hay ITRs registrados");
@@ -192,7 +198,7 @@ public class InstitucionControlador {
             carrera.setNombre(nombre);
             carrera.setEstado(true);
 
-            carreraService.agregarCarrera(carrera);
+            proxy.agregarCarrera(carrera);
             System.out.println("Carrera creada correctamente");
 
         } catch (Exception e) {
@@ -204,9 +210,10 @@ public class InstitucionControlador {
         try {
             System.out.println("--- MODIFICAR CARRERA ---");
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (id == null) return;
 
-            Carrera carrera = carreraService.obtenerPorId(id);
+            Carrera carrera = proxy.obtenerCarreraPorId(id);
             if (carrera == null) {
                 System.out.println("Carrera no encontrada");
                 return;
@@ -216,7 +223,7 @@ public class InstitucionControlador {
             System.out.print("Nuevo nombre: ");
             carrera.setNombre(sc.nextLine());
 
-            carreraService.actualizarCarrera(carrera);
+            proxy.actualizarCarrera(carrera);
             System.out.println("Carrera actualizada correctamente");
 
         } catch (Exception e) {
@@ -229,9 +236,10 @@ public class InstitucionControlador {
             System.out.println("--- DESACTIVAR CARRERA ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (id == null) return;
 
-            carreraService.eliminarCarrera(id);
+            proxy.eliminarCarrera(id);
             System.out.println("Carrera desactivada correctamente");
 
         } catch (Exception e) {
@@ -244,9 +252,10 @@ public class InstitucionControlador {
             System.out.println("--- BUSCAR CARRERA ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (id == null) return;
 
-            Carrera carrera = carreraService.obtenerPorId(id);
+            Carrera carrera = proxy.obtenerCarreraPorId(id);
             if (carrera == null) {
                 System.out.println("Carrera no encontrada");
                 return;
@@ -264,7 +273,7 @@ public class InstitucionControlador {
 
     public void listarCarreras() {
         try {
-            List<Carrera> carreras = carreraService.obtenerTodas();
+            List<Carrera> carreras = proxy.listarCarreras();
 
             if (carreras.isEmpty()) {
                 System.out.println("No hay carreras registradas");
@@ -284,6 +293,80 @@ public class InstitucionControlador {
         }
     }
 
+    // ASOCIACION ITR - CARRERA
+    public void asociarCarreraITR() {
+        try {
+            System.out.println("--- ASOCIAR CARRERA A ITR ---");
+
+            System.out.print("ID de ITR: ");
+            Integer idItr = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (idItr == null) return;
+
+            List<Carrera> carreras = proxy.listarCarreras();
+            System.out.println("--- CARRERAS DISPONIBLES ---");
+            for (Carrera c : carreras) {
+                if (c.isEstado()) System.out.println(c.getId() + ". " + c.getNombre());
+            }
+
+            System.out.print("ID de carrera a asociar: ");
+            Integer idCarrera = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (idCarrera == null) return;
+
+            proxy.asociarCarreraITR(idItr, idCarrera);
+            System.out.println("Carrera asociada correctamente al ITR");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public void desasociarCarreraITR() {
+        try {
+            System.out.println("--- DESASOCIAR CARRERA DE ITR ---");
+
+            System.out.print("ID de ITR: ");
+            Integer idItr = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (idItr == null) return;
+
+            System.out.print("ID de carrera a desasociar: ");
+            Integer idCarrera = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (idCarrera == null) return;
+
+            proxy.desasociarCarreraITR(idItr, idCarrera);
+            System.out.println("Carrera desasociada correctamente del ITR");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public void listarCarrerasDeITR() {
+        try {
+            System.out.println("--- CARRERAS DE UN ITR ---");
+
+            System.out.print("ID de ITR: ");
+            Integer idItr = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de ITR válido");
+            if (idItr == null) return;
+
+            List<Integer> idsCarreras = proxy.obtenerCarrerasPorITR(idItr);
+            if (idsCarreras.isEmpty()) {
+                System.out.println("Este ITR no tiene carreras asociadas");
+                return;
+            }
+
+            System.out.println("=== CARRERAS ASOCIADAS ===");
+            for (Integer idCarrera : idsCarreras) {
+                Carrera carrera = proxy.obtenerCarreraPorId(idCarrera);
+                if (carrera != null) {
+                    System.out.println("- " + carrera.getId() + ": " + carrera.getNombre());
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
     // GRUPOS
     public void crearGrupo() {
         try {
@@ -292,7 +375,7 @@ public class InstitucionControlador {
             System.out.print("Nombre: ");
             String nombre = sc.nextLine();
 
-            List<Carrera> carreras = carreraService.obtenerTodas();
+            List<Carrera> carreras = proxy.listarCarreras();
 
             System.out.println("--- CARRERAS DISPONIBLES ---");
             for (Carrera c : carreras) {
@@ -300,7 +383,10 @@ public class InstitucionControlador {
             }
 
             System.out.print("Seleccione carrera: ");
-            Carrera carrera = carreraService.obtenerPorId(Integer.parseInt(sc.nextLine()));
+            Integer idCarrera = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (idCarrera == null) return;
+
+            Carrera carrera = proxy.obtenerCarreraPorId(idCarrera);
 
             if (carrera == null) {
                 System.out.println("Carrera inválida");
@@ -308,7 +394,7 @@ public class InstitucionControlador {
             }
 
             Grupo grupo = new Grupo(0, nombre, true, carrera);
-            grupoService.agregarGrupo(grupo);
+            proxy.agregarGrupo(grupo);
             System.out.println("Grupo creado correctamente");
 
         } catch (Exception e) {
@@ -320,9 +406,10 @@ public class InstitucionControlador {
         try {
             System.out.println("--- MODIFICAR GRUPO ---");
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de grupo válido");
+            if (id == null) return;
 
-            Grupo grupo = grupoService.obtenerPorId(id);
+            Grupo grupo = proxy.obtenerGrupoPorId(id);
             if (grupo == null) {
                 System.out.println("Grupo no encontrado");
                 return;
@@ -332,7 +419,7 @@ public class InstitucionControlador {
             System.out.print("Nuevo nombre: ");
             grupo.setNombre(sc.nextLine());
 
-            grupoService.actualizarGrupo(grupo);
+            proxy.actualizarGrupo(grupo);
             System.out.println("Grupo actualizado correctamente");
 
         } catch (Exception e) {
@@ -345,9 +432,10 @@ public class InstitucionControlador {
             System.out.println("--- DESACTIVAR GRUPO ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de grupo válido");
+            if (id == null) return;
 
-            grupoService.eliminarGrupo(id);
+            proxy.eliminarGrupo(id);
             System.out.println("Grupo desactivado correctamente");
 
         } catch (Exception e) {
@@ -360,9 +448,10 @@ public class InstitucionControlador {
             System.out.println("--- BUSCAR GRUPO ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de grupo válido");
+            if (id == null) return;
 
-            Grupo grupo = grupoService.obtenerPorId(id);
+            Grupo grupo = proxy.obtenerGrupoPorId(id);
             if (grupo == null) {
                 System.out.println("Grupo no encontrado");
                 return;
@@ -381,7 +470,7 @@ public class InstitucionControlador {
 
     public void listarGrupos() {
         try {
-            List<Grupo> grupos = grupoService.obtenerTodos();
+            List<Grupo> grupos = proxy.listarGrupos();
             if (grupos.isEmpty()) {
                 System.out.println("No hay grupos registrados");
                 return;

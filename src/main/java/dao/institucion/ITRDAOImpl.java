@@ -28,7 +28,7 @@ public class ITRDAOImpl implements ITRDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -48,7 +48,7 @@ public class ITRDAOImpl implements ITRDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -61,7 +61,7 @@ public class ITRDAOImpl implements ITRDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -88,7 +88,7 @@ public class ITRDAOImpl implements ITRDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return null;
@@ -97,7 +97,7 @@ public class ITRDAOImpl implements ITRDAO {
     @Override
     public List<ITR> obtenerTodos() {
         List<ITR> lista = new ArrayList<>();
-        String sql = "SELECT * FROM itrs";
+        String sql = "SELECT * FROM itrs ORDER BY id_itr";
 
         try (Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -119,7 +119,7 @@ public class ITRDAOImpl implements ITRDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return lista;

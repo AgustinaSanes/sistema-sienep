@@ -19,7 +19,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             ps.setString(1, categoria.getNombre());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -31,7 +31,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             ps.setInt(2, categoria.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -42,7 +42,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -61,7 +61,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -69,7 +69,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
     @Override
     public List<Categoria> obtenerTodas() {
         List<Categoria> lista = new ArrayList<>();
-        String sql = "SELECT * FROM categorias";
+        String sql = "SELECT * FROM categorias ORDER BY id_categoria";
         try (Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -81,7 +81,7 @@ public class CategoriaDAOImpl implements CategoriaDAO {
                 lista.add(categoria);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

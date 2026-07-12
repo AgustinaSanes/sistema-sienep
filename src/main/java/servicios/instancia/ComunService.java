@@ -35,18 +35,4 @@ public class ComunService {
         }
         comunDAO.actualizarComun(comun);
     }
-
-    public void eliminarComun(int idInstancia) {
-        if (idInstancia <= 0) {
-            throw new RuntimeException("ID inválido");
-        }
-        comunDAO.eliminarPorInstancia(idInstancia);
-    }
-
-    public InstanciaComun obtenerPorInstancia(int idInstancia) {
-        if (idInstancia <= 0) {
-            throw new RuntimeException("ID inválido");
-        }
-        return comunDAO.obtenerPorInstancia(idInstancia);
-    }
 }

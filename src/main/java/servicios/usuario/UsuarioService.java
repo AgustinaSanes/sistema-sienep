@@ -24,10 +24,9 @@ public class UsuarioService {
         if (usuario == null) {
             throw new RuntimeException("El usuario no puede ser nulo");
         }
-        // Cedula
-        if (!ValidarCedula.esValida(usuario.getCedula())) {
-            throw new RuntimeException("La cédula no es válida");
-        }
+
+        ValidarCedula.validar(usuario.getCedula());
+
         // Rol
         if (usuario.getRol() == null) {
             throw new RuntimeException("El rol es obligatorio");
@@ -69,8 +68,25 @@ public class UsuarioService {
                 usuario.getContrasena().trim().isEmpty()) {
             throw new RuntimeException("La contraseña es obligatoria");
         }
-        if (usuario.getContrasena().length() > 8) {
+        validarComplejidadContrasena(usuario.getContrasena());
+    }
+
+    // Reglas de complejidad de contraseña, compartidas por alta y cambio de contraseña
+    private void validarComplejidadContrasena(String contrasena) {
+        if (contrasena.length() < 8) {
+            throw new RuntimeException("La contraseña debe tener 8 caracteres");
+        }
+        if (contrasena.length() > 8) {
             throw new RuntimeException("La contraseña no puede superar los 8 caracteres");
+        }
+        if (!contrasena.matches(".*[A-Z].*")) {
+            throw new RuntimeException("La contraseña debe incluir al menos una letra mayúscula");
+        }
+        if (!contrasena.matches(".*[a-z].*")) {
+            throw new RuntimeException("La contraseña debe incluir al menos una letra minúscula");
+        }
+        if (!contrasena.matches(".*[0-9].*")) {
+            throw new RuntimeException("La contraseña debe incluir al menos un número");
         }
     }
 
@@ -97,9 +113,8 @@ public class UsuarioService {
             throw new RuntimeException("El usuario no puede ser nulo");
         }
         // Cédula
-        if (!ValidarCedula.esValida(usuario.getCedula())) {
-            throw new RuntimeException("La cédula no es válida");
-        }
+        ValidarCedula.validar(usuario.getCedula());
+
         // Rol
         if (usuario.getRol() == null) {
             throw new RuntimeException("El rol es obligatorio");
@@ -157,18 +172,25 @@ public class UsuarioService {
     //Baja lógica
     public void eliminarUsuario(String cedula) {
 
-        if (!ValidarCedula.esValida(cedula)) {
-            throw new RuntimeException("Cédula inválida");
+        ValidarCedula.validar(cedula);
+
+        Usuario existente = usuarioDAO.buscarPorCedula(cedula);
+
+        if (existente == null) {
+            throw new RuntimeException("Usuario no encontrado");
         }
+
+        if (!existente.isEstado()) {
+            throw new RuntimeException("El usuario ya se encuentra inactivo");
+        }
+
         usuarioDAO.eliminarUsuario(cedula);
     }
 
     // Buscar por cédula
     public Usuario buscarPorCedula(String cedula) {
 
-        if (!ValidarCedula.esValida(cedula)) {
-            throw new RuntimeException("Cédula inválida");
-        }
+        ValidarCedula.validar(cedula);
 
         Estudiante estudiante = estudianteDAO.obtenerPorCedula(cedula);
         if (estudiante != null) {return estudiante;}
@@ -180,5 +202,44 @@ public class UsuarioService {
     // Obtener todos
     public List<Usuario> obtenerTodos() {
         return usuarioDAO.obtenerTodos();
+    }
+
+    // Alta lógica (reactivar cuenta)
+    public void activarUsuario(String cedula) {
+
+        ValidarCedula.validar(cedula);
+
+        Usuario existente = usuarioDAO.buscarPorCedula(cedula);
+
+        if (existente == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (existente.isEstado()) {
+            throw new RuntimeException("El usuario ya se encuentra activo");
+        }
+
+        usuarioDAO.activarUsuario(cedula);
+    }
+
+    // Cambiar contraseña (no se toca en actualizarUsuario para no pisarla accidentalmente)
+    public void cambiarContrasena(String cedula, String nuevaContrasena) {
+
+        ValidarCedula.validar(cedula);
+
+        Usuario existente = usuarioDAO.buscarPorCedula(cedula);
+
+        if (existente == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (nuevaContrasena == null || nuevaContrasena.trim().isEmpty()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
+
+        validarComplejidadContrasena(nuevaContrasena);
+
+        existente.setContrasena(EncriptarContra.encriptar(nuevaContrasena));
+        usuarioDAO.actualizarUsuario(existente);
     }
 }

@@ -10,11 +10,12 @@ public class Recordatorio {
     private String tipo;
     private boolean estado;
     private Frecuencia frecuencia;
+    private CategoriaRecordatorio categoria;
 
     //Constructores
     public Recordatorio() {}
 
-    public Recordatorio(int id, int idInstancia, String titulo,LocalDateTime fechaHora,String tipo,boolean estado,Frecuencia frecuencia){
+    public Recordatorio(int id, int idInstancia, String titulo,LocalDateTime fechaHora,String tipo,boolean estado,Frecuencia frecuencia,CategoriaRecordatorio categoria){
         this.id=id;
         this.idInstancia=idInstancia;
         this.titulo=titulo;
@@ -22,6 +23,7 @@ public class Recordatorio {
         this.tipo=tipo;
         this.estado=estado;
         this.frecuencia=frecuencia;
+        this.categoria = categoria;
     }
 
     //Getters
@@ -32,6 +34,7 @@ public class Recordatorio {
     public String getTipo(){return tipo;}
     public boolean isEstado(){return estado;}
     public Frecuencia getFrecuencia(){return frecuencia;}
+    public CategoriaRecordatorio getCategoria() {return categoria;}
 
     //Setters
     public void setId(int id){this.id=id;}
@@ -41,6 +44,7 @@ public class Recordatorio {
     public void setTipo(String tipo){this.tipo=tipo;}
     public void setEstado(boolean estado){this.estado=estado;}
     public void setFrecuencia(Frecuencia frecuencia){this.frecuencia=frecuencia;}
+    public void setCategoria(CategoriaRecordatorio categoria) {this.categoria = categoria;}
 
     @Override
     public String toString() {
@@ -50,6 +54,7 @@ public class Recordatorio {
                 " | FechaHora: " + fechaHora +
                 " | Tipo: " + tipo +
                 " | Estado: " + estado +
-                " | Frecuencia: " + frecuencia;
+                " | Frecuencia: " + frecuencia+
+                " | Categoria: " + categoria;
     }
 }

@@ -4,24 +4,19 @@ import factory.abstractFactory.UsuarioFactory;
 import modelos.institucion.*;
 import modelos.usuario.*;
 import proxy.PermisosProxy;
-import servicios.usuario.RolService;
-import servicios.institucion.*;
-import dao.usuario.TelefonoDAO;
-import dao.usuario.TelefonoDAOImpl;
+import util.EntradaHelper;
 
 import java.time.LocalDate;
 import java.util.*;
 
 public class EstudianteControlador {
     private final PermisosProxy proxy;
-    private final RolService rolService = new RolService();
-    private final CarreraService carreraService = new CarreraService();
-    private final GrupoService grupoService = new GrupoService();
-    private final TelefonoDAO telefonoDAO = new TelefonoDAOImpl();
+    private final InstanciaControlador instanciaControlador;
     private final Scanner sc = new Scanner(System.in);
 
     public EstudianteControlador(PermisosProxy proxy) {
         this.proxy = proxy;
+        this.instanciaControlador = new InstanciaControlador(proxy);
     }
 
     public void crearEstudiante() {
@@ -43,30 +38,51 @@ public class EstudianteControlador {
             System.out.print("Contraseña: ");
             String contrasena = sc.nextLine();
 
-            Rol rol = rolService.obtenerPorId(4);
+            Rol rol = proxy.obtenerRolParaEstudiante(5);
 
             if (rol == null || !rol.isEstado()) {
                 System.out.println("No existe el rol Estudiante");
                 return;
             }
 
-            List<Carrera> carreras = carreraService.obtenerTodas();
+            List<Carrera> carreras = proxy.listarCarrerasCatalogo();
             System.out.println("--- CARRERAS DISPONIBLES ---");
             for (Carrera c : carreras) {
                 if (c.isEstado()) System.out.println(c.getId() + ". " + c.getNombre());
             }
             System.out.print("Seleccione carrera: ");
-            Carrera carrera = carreraService.obtenerPorId(Integer.parseInt(sc.nextLine()));
+            Integer idCarrera = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (idCarrera == null) return;
+
+            Carrera carrera = proxy.obtenerCarreraCatalogoPorId(idCarrera);
             if (carrera == null) { System.out.println("Carrera inválida"); return; }
 
-            List<Grupo> grupos = grupoService.obtenerTodos();
+            List<Grupo> grupos = proxy.listarGruposCatalogo();
             System.out.println("--- GRUPOS DISPONIBLES ---");
             for (Grupo g : grupos) {
                 if (g.isEstado()) System.out.println(g.getId() + ". " + g.getNombre());
             }
-            System.out.print("Seleccione grupo: ");
-            Grupo grupo = grupoService.obtenerPorId(Integer.parseInt(sc.nextLine()));
-            if (grupo == null) { System.out.println("Grupo inválido"); return; }
+            System.out.print("Seleccione grupo (Enter para omitir): ");
+            String idGrupo = sc.nextLine();
+
+            Grupo grupo = null;
+
+            if (!idGrupo.isBlank()) {
+                int idGrupoInt;
+                try {
+                    idGrupoInt = Integer.parseInt(idGrupo.trim());
+                } catch (NumberFormatException e) {
+                    System.out.println("Debe ingresar un ID de grupo válido");
+                    return;
+                }
+
+                grupo = proxy.obtenerGrupoCatalogoPorId(idGrupoInt);
+
+                if (grupo == null) {
+                    System.out.println("Grupo inválido");
+                    return;
+                }
+            }
 
             UsuarioFactory factory = new UsuarioFactory();
             Estudiante estudiante = (Estudiante) factory.crearUsuario("Estudiante");
@@ -84,7 +100,19 @@ public class EstudianteControlador {
             estudiante.setSistemaSalud(sc.nextLine());
 
             System.out.print("Fecha nacimiento (YYYY-MM-DD): ");
-            estudiante.setFechaNacimiento(LocalDate.parse(sc.nextLine()));
+            String fecha = sc.nextLine();
+
+            if (fecha.isBlank()) {
+                System.out.println("La fecha de nacimiento es obligatoria");
+                return;
+            }
+
+            try {
+                estudiante.setFechaNacimiento(LocalDate.parse(fecha));
+            } catch (Exception e) {
+                System.out.println("Formato inválido. Use YYYY-MM-DD");
+                return;
+            }
 
             System.out.print("Motivo: ");
             estudiante.setMotivo(sc.nextLine());
@@ -95,9 +123,42 @@ public class EstudianteControlador {
             System.out.print("Número puerta: ");
             estudiante.setNroPuerta(sc.nextLine());
 
-            System.out.print("Teléfono: ");
-            String tel = sc.nextLine();
-            if (!tel.isEmpty()) estudiante.agregarTelefono(tel);
+            System.out.print("Foto (Enter para omitir): ");
+            String foto = sc.nextLine();
+            estudiante.setFoto(foto.isEmpty() ? null : foto);
+
+            System.out.print("¿Observaciones confidenciales? (s/n): ");
+            String obsConf = sc.nextLine().trim();
+
+            if (!obsConf.equalsIgnoreCase("s") &&
+                    !obsConf.equalsIgnoreCase("n")) {
+
+                System.out.println("Debe responder s o n");
+                return;
+            }
+
+            estudiante.setObsConfidenciales(obsConf.equalsIgnoreCase("s"));
+
+            System.out.print("Observaciones/comentarios (Enter para omitir): ");
+            String obsComentarios = sc.nextLine();
+            estudiante.setObsComentarios(obsComentarios.isEmpty() ? null : obsComentarios);
+
+            System.out.print("Información estado de salud (Enter para omitir): ");
+            String infoSalud = sc.nextLine();
+            estudiante.setInfoEstadoSalud(infoSalud.isEmpty() ? null : infoSalud);
+
+            System.out.println("Ingrese los teléfonos (Enter vacío para finalizar):");
+
+            while (true) {
+                System.out.print("Teléfono: ");
+                String telefono = sc.nextLine().trim();
+
+                if (telefono.isEmpty()) {
+                    break;
+                }
+
+                estudiante.agregarTelefono(telefono);
+            }
 
             proxy.agregarEstudiante(estudiante);
             System.out.println("Estudiante creado correctamente");
@@ -136,6 +197,13 @@ public class EstudianteControlador {
                 System.out.println("6. Motivo          [" + estudiante.getMotivo() + "]");
                 System.out.println("7. Calle           [" + estudiante.getCalle() + "]");
                 System.out.println("8. Número puerta   [" + estudiante.getNroPuerta() + "]");
+                System.out.println("9. Teléfono        [" + estudiante.getTelefono() + "]");
+                System.out.println("10. Foto                   [" + estudiante.getFoto() + "]");
+                System.out.println("11. Obs. confidenciales    [" + estudiante.isObsConfidenciales() + "]");
+                System.out.println("12. Obs./Comentarios       [" + estudiante.getObsComentarios() + "]");
+                System.out.println("13. Info. estado de salud  [" + estudiante.getInfoEstadoSalud() + "]");
+                System.out.println("14. Contraseña");
+                System.out.println("15. Estado          [" + (estudiante.isEstado() ? "Activo" : "Inactivo") + "]");
                 System.out.println("0. Guardar y volver");
                 System.out.print("Opción: ");
 
@@ -164,7 +232,18 @@ public class EstudianteControlador {
                     }
                     case 5 -> {
                         System.out.print("Nueva fecha (YYYY-MM-DD): ");
-                        estudiante.setFechaNacimiento(java.time.LocalDate.parse(sc.nextLine()));
+                        String fecha = sc.nextLine();
+
+                        if (fecha.isBlank()) {
+                            System.out.println("La fecha de nacimiento es obligatoria");
+                            break;
+                        }
+
+                        try {
+                            estudiante.setFechaNacimiento(LocalDate.parse(fecha));
+                        } catch (Exception e) {
+                            System.out.println("Formato inválido. Use YYYY-MM-DD");
+                        }
                     }
                     case 6 -> {
                         System.out.print("Nuevo motivo: ");
@@ -178,6 +257,87 @@ public class EstudianteControlador {
                         System.out.print("Nuevo número puerta: ");
                         estudiante.setNroPuerta(sc.nextLine());
                     }
+
+                    case 9 -> {
+                        estudiante.getTelefono().clear();
+
+                        System.out.println("Ingrese los teléfonos (Enter vacío para finalizar):");
+
+                        while (true) {
+                            System.out.print("Teléfono: ");
+                            String telefono = sc.nextLine().trim();
+
+                            if (telefono.isEmpty()) {
+                                break;
+                            }
+
+                            estudiante.agregarTelefono(telefono);
+                        }
+                    }
+
+                    case 10 -> {
+                        System.out.print("Nueva foto (Enter para omitir): ");
+                        String foto = sc.nextLine();
+                        estudiante.setFoto(foto.isEmpty() ? null : foto);
+                    }
+                    case 11 -> {
+                        System.out.print("¿Observaciones confidenciales? (s/n): ");
+                        estudiante.setObsConfidenciales(sc.nextLine().equalsIgnoreCase("s"));
+                    }
+                    case 12 -> {
+                        System.out.print("Nuevas observaciones/comentarios (Enter para omitir): ");
+                        String obs = sc.nextLine();
+                        estudiante.setObsComentarios(obs.isEmpty() ? null : obs);
+                    }
+                    case 13 -> {
+                        System.out.print("Nueva información de estado de salud (Enter para omitir): ");
+                        String info = sc.nextLine();
+                        estudiante.setInfoEstadoSalud(info.isEmpty() ? null : info);
+                    }
+                    case 14 -> {
+                        System.out.print("Nueva contraseña: ");
+                        String nuevaContrasena = sc.nextLine();
+                        try {
+                            proxy.cambiarContrasena(estudiante.getCedula(), nuevaContrasena);
+                            System.out.println("Contraseña actualizada correctamente");
+                        } catch (Exception e) {
+                            System.out.println("Error: " + e.getMessage());
+                        }
+                    }
+                    case 15 -> {
+                        try {
+                            if (estudiante.isEstado()) {
+
+                                System.out.print("¿Está seguro de desactivar este estudiante? (S/N): ");
+                                String respuesta = sc.nextLine();
+
+                                if (respuesta.equalsIgnoreCase("S")) {
+                                    proxy.desactivarUsuario(estudiante.getCedula());
+                                    estudiante.setEstado(false);
+                                    System.out.println("Estudiante desactivado correctamente.");
+                                } else {
+                                    System.out.println("Operación cancelada.");
+                                }
+
+                            } else {
+
+                                System.out.print("¿Desea volver a activar este estudiante? (S/N): ");
+                                String respuesta = sc.nextLine();
+
+                                if (respuesta.equalsIgnoreCase("S")) {
+                                    proxy.activarUsuario(estudiante.getCedula());
+                                    estudiante.setEstado(true);
+                                    System.out.println("Estudiante activado correctamente.");
+                                } else {
+                                    System.out.println("Operación cancelada.");
+                                }
+
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Error: " + e.getMessage());
+                        }
+                    }
+
                     case 0 -> System.out.println("Guardando...");
                     default -> System.out.println("Opción inválida");
                 }
@@ -186,96 +346,6 @@ public class EstudianteControlador {
 
             proxy.modificarUsuario(estudiante);
             System.out.println("Estudiante actualizado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void desactivarEstudiante() {
-        try {
-            System.out.println("--- DESACTIVAR ESTUDIANTE ---");
-
-            System.out.print("Ingrese cédula: ");
-            String cedula = sc.nextLine();
-
-            Usuario usuario = proxy.buscarUsuario(cedula);
-            if (usuario == null) { System.out.println("Estudiante no encontrado"); return; }
-
-            proxy.desactivarUsuario(cedula);
-            System.out.println("Estudiante desactivado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    // ===================== TELÉFONOS =====================
-
-    public void agregarTelefono() {
-        try {
-            System.out.println("--- AGREGAR TELÉFONO ---");
-            System.out.print("Cédula del estudiante: ");
-            String cedula = sc.nextLine();
-
-            System.out.print("Número de teléfono: ");
-            String numero = sc.nextLine();
-
-            telefonoDAO.agregarTelefono(cedula, numero);
-            System.out.println("Teléfono agregado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void eliminarTelefono() {
-        try {
-            System.out.println("--- ELIMINAR TELÉFONO ---");
-            System.out.print("Cédula del estudiante: ");
-            String cedula = sc.nextLine();
-
-            List<String> telefonos = telefonoDAO.obtenerPorEstudiante(cedula);
-
-            if (telefonos.isEmpty()) {
-                System.out.println("No hay teléfonos registrados");
-                return;
-            }
-
-            System.out.println("Teléfonos registrados:");
-
-            for (String t : telefonos) {
-                System.out.println(t);
-            }
-
-            System.out.print("Número del teléfono a eliminar: ");
-            String numero = sc.nextLine();
-
-            telefonoDAO.eliminarTelefono(cedula, numero);
-
-            System.out.println("Teléfono eliminado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void listarTelefonos() {
-        try {
-            System.out.println("--- TELÉFONOS DEL ESTUDIANTE ---");
-            System.out.print("Cédula del estudiante: ");
-            String cedula = sc.nextLine();
-
-            List<String> telefonos = telefonoDAO.obtenerPorEstudiante(cedula);
-
-            if (telefonos.isEmpty()) {
-                System.out.println("No hay teléfonos registrados");
-                return;
-            }
-
-            for (String t : telefonos) {
-                System.out.println(t);
-                }
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -324,11 +394,12 @@ public class EstudianteControlador {
     public void buscarPorCarrera() {
         try {
             System.out.println("--- BUSCAR ESTUDIANTES POR CARRERA ---");
-            List<Carrera> carreras = carreraService.obtenerTodas();
+            List<Carrera> carreras = proxy.listarCarrerasCatalogo();
             for (Carrera c : carreras) System.out.println(c.getId() + ". " + c.getNombre());
 
             System.out.print("Seleccione carrera: ");
-            int idCarrera = Integer.parseInt(sc.nextLine());
+            Integer idCarrera = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de carrera válido");
+            if (idCarrera == null) return;
 
             List<Estudiante> lista = proxy.buscarEstudiantesPorCarrera(idCarrera);
             if (lista.isEmpty()) { System.out.println("No se encontraron estudiantes"); return; }
@@ -342,11 +413,12 @@ public class EstudianteControlador {
     public void buscarPorGrupo() {
         try {
             System.out.println("--- BUSCAR ESTUDIANTES POR GRUPO ---");
-            List<Grupo> grupos = grupoService.obtenerTodos();
+            List<Grupo> grupos = proxy.listarGruposCatalogo();
             for (Grupo g : grupos) System.out.println(g.getId() + ". " + g.getNombre());
 
             System.out.print("Seleccione grupo: ");
-            int idGrupo = Integer.parseInt(sc.nextLine());
+            Integer idGrupo = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de grupo válido");
+            if (idGrupo == null) return;
 
             List<Estudiante> lista = proxy.buscarEstudiantesPorGrupo(idGrupo);
             if (lista.isEmpty()) { System.out.println("No se encontraron estudiantes"); return; }
@@ -363,7 +435,8 @@ public class EstudianteControlador {
             System.out.println("1. Activos");
             System.out.println("2. Inactivos");
             System.out.print("Opción: ");
-            int op = Integer.parseInt(sc.nextLine());
+            Integer op = EntradaHelper.leerEntero(sc, "Debe ingresar 1 o 2");
+            if (op == null) return;
 
             List<Estudiante> lista = proxy.buscarEstudiantesPorEstado(op == 1);
             if (lista.isEmpty()) { System.out.println("No se encontraron estudiantes"); return; }
@@ -372,6 +445,61 @@ public class EstudianteControlador {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public void instanciaFichaEstudiante() {
+        try {
+            System.out.println("--- FICHA DE ALUMNO ---");
+            System.out.print("Ingrese cédula: ");
+            String cedula = sc.nextLine();
+
+            Estudiante estudiante = proxy.buscarEstudiantePorCedula(cedula);
+
+            if (estudiante == null) {
+                System.out.println("Estudiante no encontrado");
+                return;
+            }
+
+            mostrarFicha(estudiante);
+
+            int opcion;
+            do {
+                System.out.println("--- " + estudiante.getNombre() + " " + estudiante.getApellido() + " ---");
+                System.out.println("1. Nueva instancia común");
+                System.out.println("2. Nueva incidencia");
+                System.out.println("0. Volver");
+                System.out.print("Opción: ");
+
+                try {
+                    opcion = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e) {
+                    opcion = -1;
+                }
+
+                switch (opcion) {
+                    case 1 -> instanciaControlador.crearInstanciaComun(estudiante);
+                    case 2 -> instanciaControlador.crearIncidencia(estudiante);
+                    case 0 -> System.out.println("Volviendo...");
+                    default -> System.out.println("Opción inválida");
+                }
+
+            } while (opcion != 0);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void mostrarFicha(Estudiante e) {
+        System.out.println("=== FICHA DE ALUMNO ===");
+        System.out.println("Cédula: " + e.getCedula());
+        System.out.println("Nombre: " + e.getNombre() + " " + e.getApellido());
+        System.out.println("Email: " + e.getEmail());
+        System.out.println("Estado: " + (e.isEstado() ? "Activo" : "Inactivo"));
+        System.out.println("Grupo: " + (e.getGrupo() != null ? e.getGrupo().getNombre() : "-"));
+        System.out.println("Sistema salud: " + e.getSistemaSalud());
+        System.out.println("Fecha nacimiento: " + e.getFechaNacimiento());
+        System.out.println("Motivo: " + e.getMotivo());
     }
 
     public void mostrarListaEstudiantes(List<Estudiante> lista) {

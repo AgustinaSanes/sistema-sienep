@@ -28,7 +28,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
             ps.setBoolean(6, informe.isConfidencial());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -47,7 +47,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
             ps.setInt(6, informe.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -59,7 +59,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -87,7 +87,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -95,7 +95,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
     @Override
     public List<InformeAdjunto> obtenerTodos() {
         List<InformeAdjunto> lista = new ArrayList<>();
-        String sql = "SELECT * FROM info_adjuntos WHERE estado = true";
+        String sql = "SELECT * FROM info_adjuntos WHERE estado = true ORDER BY nom_archivo";
 
         try (PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -117,7 +117,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
                 lista.add(informe);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -125,7 +125,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
     @Override
     public List<InformeAdjunto> obtenerPorEstudiante(String cedula) {
         List<InformeAdjunto> lista = new ArrayList<>();
-        String sql = "SELECT * FROM info_adjuntos WHERE cedula = ? AND estado = true";
+        String sql = "SELECT * FROM info_adjuntos WHERE cedula = ? AND estado = true ORDER BY nom_archivo";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, cedula);
@@ -147,7 +147,7 @@ public class InformeAdjuntoDAOImpl implements InformeAdjuntoDAO {
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

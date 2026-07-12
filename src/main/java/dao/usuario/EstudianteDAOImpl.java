@@ -17,7 +17,6 @@ public class EstudianteDAOImpl implements EstudianteDAO {
         this.c = ConexionBDSingleton.getInstancia().getConexion();
     }
 
-    //Insertar estudiante
     @Override
     public void agregarEstudiante(Estudiante estudiante) {
 
@@ -30,8 +29,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, estudiante.getCedula());
-            ps.setInt(2, estudiante.getGrupo().getId());
-            ps.setString(3, estudiante.getFoto());
+            ps.setObject(2, estudiante.getGrupo() != null ? estudiante.getGrupo().getId() : null);            ps.setString(3, estudiante.getFoto());
             ps.setString(4, estudiante.getSistemaSalud());
             ps.setDate(5, Date.valueOf(estudiante.getFechaNacimiento()));
             ps.setBoolean(6, estudiante.isObsConfidenciales());
@@ -44,11 +42,10 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
-    //Actualizar estudiante
     @Override
     public void actualizarEstudiante(Estudiante estudiante) {
 
@@ -60,8 +57,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, estudiante.getGrupo().getId());
-            ps.setString(2, estudiante.getFoto());
+            ps.setObject(1, estudiante.getGrupo() != null ? estudiante.getGrupo().getId() : null);            ps.setString(2, estudiante.getFoto());
             ps.setString(3, estudiante.getSistemaSalud());
             ps.setDate(4, Date.valueOf(estudiante.getFechaNacimiento()));
             ps.setBoolean(5, estudiante.isObsConfidenciales());
@@ -71,15 +67,28 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             ps.setString(9, estudiante.getCalle());
             ps.setString(10, estudiante.getNroPuerta());
             ps.setString(11, estudiante.getCedula());
-
             ps.executeUpdate();
+            TelefonoDAO telefonoDAO = new TelefonoDAOImpl();
+
+            List<String> telefonosBD = telefonoDAO.obtenerPorEstudiante(estudiante.getCedula());
+
+            for (String telefono : telefonosBD) {
+                if (!estudiante.getTelefono().contains(telefono)) {
+                    telefonoDAO.eliminarTelefono(estudiante.getCedula(), telefono);
+                }
+            }
+
+            for (String telefono : estudiante.getTelefono()) {
+                if (!telefonosBD.contains(telefono)) {
+                    telefonoDAO.agregarTelefono(estudiante.getCedula(), telefono);
+                }
+            }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
-    //Obtener por cedula
     @Override
     public Estudiante obtenerPorCedula(String cedula) {
 
@@ -104,13 +113,12 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return null;
     }
 
-    //Buscar por nombre completo
     @Override
     public List<Estudiante> buscarPorNombreApellido(String texto) {
 
@@ -122,7 +130,8 @@ public class EstudianteDAOImpl implements EstudianteDAO {
                         "JOIN estudiantes e ON u.cedula = e.cedula " +
                         "JOIN roles r ON u.id_rol = r.id_rol " +
                         "WHERE LOWER(u.nombre || ' ' || u.apellido) LIKE ? " +
-                        "AND u.estado = true";
+                        "AND u.estado = true " +
+                        "ORDER BY u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -136,13 +145,12 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return lista;
     }
 
-    //Buscar por carrera
     @Override
     public List<Estudiante> buscarPorCarrera(int idCarrera){
         List<Estudiante> lista = new ArrayList<>();
@@ -152,10 +160,10 @@ public class EstudianteDAOImpl implements EstudianteDAO {
                 "JOIN estudiantes e ON u.cedula = e.cedula " +
                 "JOIN roles r ON u.id_rol = r.id_rol " +
                 "JOIN grupos g ON e.id_grupo = g.id_grupo " +
-                "WHERE g.id_carrera = ? AND u.estado = true";
+                "WHERE g.id_carrera = ? AND u.estado = true " +
+                "ORDER BY g.nom_grupo, u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-
             ps.setInt(1, idCarrera);
 
             ResultSet rs = ps.executeQuery();
@@ -163,12 +171,11 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             while (rs.next()) lista.add(mapearEstudiante(rs));
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
 
-    //Buscar por grupo
     @Override
     public List<Estudiante> buscarPorGrupo(int idGrupo) {
 
@@ -178,7 +185,8 @@ public class EstudianteDAOImpl implements EstudianteDAO {
                 "FROM usuarios u " +
                 "JOIN estudiantes e ON u.cedula = e.cedula " +
                 "JOIN roles r ON u.id_rol = r.id_rol " +
-                "WHERE e.id_grupo = ? AND u.estado = true";
+                "WHERE e.id_grupo = ? AND u.estado = true " +
+                "ORDER BY u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -189,12 +197,11 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             while (rs.next()) lista.add(mapearEstudiante(rs));
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
 
-    //Buscar por estado
     @Override
     public List<Estudiante> buscarPorEstado(boolean estado) {
 
@@ -204,7 +211,8 @@ public class EstudianteDAOImpl implements EstudianteDAO {
                 "FROM usuarios u " +
                 "JOIN estudiantes e ON u.cedula = e.cedula " +
                 "JOIN roles r ON u.id_rol = r.id_rol " +
-                "WHERE u.estado = ?";
+                "WHERE u.estado = ? " +
+                "ORDER BY u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -215,7 +223,7 @@ public class EstudianteDAOImpl implements EstudianteDAO {
             while (rs.next()) lista.add(mapearEstudiante(rs));
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -246,6 +254,12 @@ public class EstudianteDAOImpl implements EstudianteDAO {
         );
         GrupoDAOImpl grupoDAO = new GrupoDAOImpl();
         estudiante.setGrupo(grupoDAO.obtenerPorId(rs.getInt("id_grupo")));
+
+        TelefonoDAOImpl telefonoDAO = new TelefonoDAOImpl();
+        for (String telefono : telefonoDAO.obtenerPorEstudiante(estudiante.getCedula())) {
+            estudiante.agregarTelefono(telefono);
+        }
+
         return estudiante;
     }
 }

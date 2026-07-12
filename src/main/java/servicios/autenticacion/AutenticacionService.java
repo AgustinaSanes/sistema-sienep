@@ -5,7 +5,6 @@ import modelos.usuario.Estudiante;
 import modelos.usuario.Funcionario;
 import modelos.usuario.Rol;
 import modelos.usuario.Usuario;
-import servicios.usuario.UsuarioService;
 import util.EncriptarContra;
 
 import java.sql.Connection;

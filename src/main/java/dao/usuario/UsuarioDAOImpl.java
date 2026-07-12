@@ -41,7 +41,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -66,7 +66,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -84,7 +84,25 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
+        }
+    }
+
+    //Alta lógica (reactivar cuenta)
+    @Override
+    public void activarUsuario(String cedula) {
+
+        String sql =
+                "UPDATE usuarios SET estado = true WHERE cedula = ?";
+
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, cedula);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -122,7 +140,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return null;
@@ -138,7 +156,8 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                 "SELECT u.*, r.nom_rol, r.estado AS estado_rol " +
                         "FROM usuarios u " +
                         "JOIN roles r ON u.id_rol = r.id_rol " +
-                        "WHERE u.estado = true";
+                        "WHERE u.estado = true " +
+                        "ORDER BY u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -165,7 +184,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return lista;

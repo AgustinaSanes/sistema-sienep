@@ -6,12 +6,9 @@ import java.util.List;
 public class RecordatorioService {
 
     private final RecordatorioDAO recordatorioDAO;
-    private final FrecuenciaDAO frecuenciaDAO;
 
     public RecordatorioService() {
         this.recordatorioDAO = new RecordatorioDAOImpl();
-        this.frecuenciaDAO = new FrecuenciaDAOImpl();
-
     }
 
     private void validarRecordatorio(Recordatorio recordatorio) {
@@ -26,6 +23,9 @@ public class RecordatorioService {
         }
         if (recordatorio.getFechaHora() == null) {
             throw new RuntimeException("La fecha y hora son obligatorias");
+        }
+        if (recordatorio.getFechaHora().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("La fecha del recordatorio debe ser futura.");
         }
         if (recordatorio.getFrecuencia() == null) {
             throw new RuntimeException("La frecuencia es obligatoria");
@@ -70,14 +70,5 @@ public class RecordatorioService {
             throw new RuntimeException("ID inválido");
         }
         return recordatorioDAO.obtenerPorInstancia(idInstancia);
-    }
-
-    public List<Frecuencia> obtenerFrecuencias() {
-        return frecuenciaDAO.obtenerTodas();
-    }
-
-    public Frecuencia obtenerFrecuenciaPorId(int id) {
-        if (id <= 0) throw new RuntimeException("ID inválido");
-        return frecuenciaDAO.obtenerPorId(id);
     }
 }

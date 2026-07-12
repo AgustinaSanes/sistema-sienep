@@ -31,6 +31,12 @@ public class InformeService {
         if (informe.getRutaArchivo() == null || informe.getRutaArchivo().trim().isEmpty()) {
             throw new RuntimeException("La ruta del informe es obligatoria");
         }
+        if (informe.getCategoria() == null || informe.getCategoria().trim().isEmpty()) {
+            throw new RuntimeException("La categoría es obligatoria");
+        }
+        if (informe.getCategoria().length() > 50) {
+            throw new RuntimeException("La categoría no puede superar los 50 caracteres");
+        }
         if (informe.getEstudiante() == null) {
             throw new RuntimeException("El estudiante es obligatorio");
         }
@@ -53,8 +59,12 @@ public class InformeService {
         if (id <= 0) {
             throw new RuntimeException("ID inválido");
         }
-        if (informeDAO.obtenerPorId(id) == null) {
+        InformeAdjunto existente = informeDAO.obtenerPorId(id);
+        if (existente == null) {
             throw new RuntimeException("El informe no existe");
+        }
+        if (!existente.isEstado()) {
+            throw new RuntimeException("El informe ya se encuentra dado de baja");
         }
         informeDAO.eliminarInforme(id);
     }

@@ -23,6 +23,14 @@ public class AuditoriaObserver implements Observer {
         if (evento.contains("INCIDENCIA")) return "incidencias";
         if (evento.contains("INFORME")) return "informes_adjuntos";
         if (evento.contains("LOGIN")) return "usuarios";
+        if (evento.contains("RECORDATORIO")) return "recordatorios";
+        if (evento.contains("CATEGORIA")) return "categorias";
+        if (evento.contains("FRECUENCIA")) return "frecuencias";
+        if (evento.contains("ROL")) return "roles";
+        if (evento.contains("PERMISO")) return "permisos";
+        if (evento.contains("ITR")) return "itrs";
+        if (evento.contains("CARRERA")) return "carreras";
+        if (evento.contains("GRUPO")) return "grupos";
         return "sistema";
     }
 }

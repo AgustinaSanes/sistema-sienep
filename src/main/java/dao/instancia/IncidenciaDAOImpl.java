@@ -24,7 +24,7 @@ public class IncidenciaDAOImpl implements IncidenciaDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -41,22 +41,7 @@ public class IncidenciaDAOImpl implements IncidenciaDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void eliminarPorInstancia(int idInstancia) {
-
-        String sql = "DELETE FROM incidencias WHERE id_instancia = ?";
-
-        try (PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt(1, idInstancia);
-            ps.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -76,7 +61,7 @@ public class IncidenciaDAOImpl implements IncidenciaDAO {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }

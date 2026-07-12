@@ -2,6 +2,7 @@ package dao.instancia;
 
 import modelos.instancia.Instancia;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface InstanciaDAO {
@@ -11,4 +12,6 @@ public interface InstanciaDAO {
     Instancia obtenerPorId(int id);
     List<Instancia> obtenerPorEstudiante(String cedula);
     List<Instancia> obtenerPorCategoria(int idCategoria);
+    List<Instancia> buscarPorFecha(LocalDate fecha);
+    List<Instancia> buscarPorDescripcion(String descripcion);
 }

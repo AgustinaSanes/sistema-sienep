@@ -22,7 +22,7 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
             ps.setString(1, funcionario.getCedula());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -54,7 +54,7 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -66,7 +66,8 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
                 "FROM usuarios u " +
                 "JOIN roles r ON u.id_rol = r.id_rol " +
                 "JOIN funcionarios f ON u.cedula = f.cedula " +
-                "WHERE u.estado = true";
+                "WHERE u.estado = true " +
+                "ORDER BY u.apellido, u.nombre";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
@@ -88,7 +89,7 @@ public class FuncionarioDAOImpl implements FuncionarioDAO {
                 lista.add(funcionario);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

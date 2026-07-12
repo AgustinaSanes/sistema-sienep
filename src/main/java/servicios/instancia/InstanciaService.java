@@ -2,6 +2,8 @@ package servicios.instancia;
 import dao.instancia.*;
 import modelos.instancia.*;
 import util.ValidarCedula;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class InstanciaService {
@@ -16,7 +18,7 @@ public class InstanciaService {
         this.incidenciaDAO = new IncidenciaDAOImpl();
     }
 
-    private void validarInstancia(Instancia instancia) {
+    private void validarInstancia(Instancia instancia, boolean esCreacion) {
         if (instancia == null) {
             throw new RuntimeException("La instancia no puede ser nula");
         }
@@ -26,27 +28,54 @@ public class InstanciaService {
         if (instancia.getTitulo().length() > 100) {
             throw new RuntimeException("El título no puede superar los 100 caracteres");
         }
+        if (instancia.getComentario() == null || instancia.getComentario().trim().isEmpty()) {
+            throw new RuntimeException("El comentario es obligatorio");
+        }
+        if (instancia.getComentario().length() > 255) {
+            throw new RuntimeException("El comentario no puede superar los 255 caracteres");
+        }
         if (instancia.getFechaHora() == null) {
             throw new RuntimeException("La fecha y hora son obligatorias");
         }
-        if (instancia.getEstudiante() == null) {
-            throw new RuntimeException("El estudiante es obligatorio");
-        }
-        if (instancia.getFuncionario() == null) {
-            throw new RuntimeException("El funcionario es obligatorio");
+
+        if (instancia instanceof Incidencia incidencia) {
+            if (incidencia.getLugar() == null || incidencia.getLugar().trim().isEmpty()) {
+                throw new RuntimeException("El lugar es obligatorio");
+            }
+
+            // La exigencia de tener al menos un involucrado solo aplica al crear.
+            // Al actualizar, los involucrados se gestionan por su propio flujo
+            // (agregar/eliminar), y no debe bloquear la edición de otros campos.
+            if (esCreacion && (incidencia.getInvolucrados() == null || incidencia.getInvolucrados().isEmpty())) {
+                throw new RuntimeException("Debe ingresar al menos un involucrado");
+            }
+
+            if (incidencia.getInvolucrados() != null) {
+                for (String involucrado : incidencia.getInvolucrados()) {
+                    if (involucrado == null || involucrado.trim().isEmpty()) {
+                        throw new RuntimeException("El involucrado no puede estar vacío");
+                    }
+                    if (involucrado.length() > 50) {
+                        throw new RuntimeException("El involucrado no puede superar los 50 caracteres");
+                    }
+                }
+            }
         }
     }
 
     public void agregarInstancia(Instancia instancia) {
-        validarInstancia(instancia);
+        validarInstancia(instancia, true);
         instanciaDAO.agregarInstancia(instancia);
     }
 
     public void actualizarInstancia(Instancia instancia) {
-        validarInstancia(instancia);
+        validarInstancia(instancia, false);
         instanciaDAO.actualizarInstancia(instancia);
 
         if (instancia instanceof InstanciaComun comun) {
+            if (comun.getCategoria() == null) {
+                throw new RuntimeException("La categoría es obligatoria");
+            }
             comunDAO.actualizarComun(comun);
         } else if (instancia instanceof Incidencia incidencia) {
             incidenciaDAO.actualizarIncidencia(incidencia);
@@ -72,9 +101,7 @@ public class InstanciaService {
     }
 
     public List<Instancia> obtenerPorEstudiante(String cedula) {
-        if (!ValidarCedula.esValida(cedula)) {
-            throw new RuntimeException("Cédula inválida");
-        }
+        ValidarCedula.validar(cedula);
         return instanciaDAO.obtenerPorEstudiante(cedula);
     }
 
@@ -83,5 +110,13 @@ public class InstanciaService {
             throw new RuntimeException("ID de categoría inválido");
         }
         return instanciaDAO.obtenerPorCategoria(idCategoria);
+    }
+
+    public List<Instancia> buscarPorFecha(LocalDate fecha) {
+        return instanciaDAO.buscarPorFecha(fecha);
+    }
+
+    public List<Instancia> buscarPorDescripcion(String descripcion) {
+        return instanciaDAO.buscarPorDescripcion(descripcion);
     }
 }

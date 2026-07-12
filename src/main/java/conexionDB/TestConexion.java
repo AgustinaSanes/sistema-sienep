@@ -1,5 +1,6 @@
 package conexionDB;
 
+// Prueba conectividad
 public class TestConexion {
     public static void main(String[] args) {
         ConexionBDSingleton conexion = ConexionBDSingleton.getInstancia();

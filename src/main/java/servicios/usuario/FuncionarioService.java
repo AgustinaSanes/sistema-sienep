@@ -17,9 +17,8 @@ public class FuncionarioService {
         if (funcionario == null) {
             throw new RuntimeException("El funcionario no puede ser nulo");
         }
-        if (!ValidarCedula.esValida(funcionario.getCedula())) {
-            throw new RuntimeException("Cédula inválida");
-        }
+
+        ValidarCedula.validar(funcionario.getCedula());
     }
 
     public void agregarFuncionario(Funcionario funcionario) {
@@ -31,9 +30,9 @@ public class FuncionarioService {
     }
 
     public Funcionario obtenerPorCedula(String cedula) {
-        if (!ValidarCedula.esValida(cedula)) {
-            throw new RuntimeException("Cédula inválida");
-        }
+
+        ValidarCedula.validar(cedula);
+
         return funcionarioDAO.obtenerPorCedula(cedula);
     }
 

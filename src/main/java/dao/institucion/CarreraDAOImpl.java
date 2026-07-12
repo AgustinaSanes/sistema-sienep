@@ -21,7 +21,7 @@ public class CarreraDAOImpl implements CarreraDAO {
             ps.setString(1, carrera.getNombre());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -33,7 +33,7 @@ public class CarreraDAOImpl implements CarreraDAO {
             ps.setInt(2, carrera.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -44,7 +44,7 @@ public class CarreraDAOImpl implements CarreraDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -63,7 +63,7 @@ public class CarreraDAOImpl implements CarreraDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -71,7 +71,7 @@ public class CarreraDAOImpl implements CarreraDAO {
     @Override
     public List<Carrera> obtenerTodas() {
         List<Carrera> lista = new ArrayList<>();
-        String sql = "SELECT * FROM carreras";
+        String sql = "SELECT * FROM carreras ORDER BY id_carrera";
         try (Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -83,7 +83,7 @@ public class CarreraDAOImpl implements CarreraDAO {
                 lista.add(carrera);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

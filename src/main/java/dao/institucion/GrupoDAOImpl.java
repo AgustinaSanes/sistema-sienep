@@ -23,7 +23,7 @@ public class GrupoDAOImpl implements GrupoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -38,7 +38,7 @@ public class GrupoDAOImpl implements GrupoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -49,7 +49,7 @@ public class GrupoDAOImpl implements GrupoDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -75,7 +75,7 @@ public class GrupoDAOImpl implements GrupoDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return null;
@@ -84,7 +84,7 @@ public class GrupoDAOImpl implements GrupoDAO {
     @Override
     public List<Grupo> obtenerTodos() {
         List<Grupo> lista = new ArrayList<>();
-        String sql = "SELECT * FROM grupos";
+        String sql = "SELECT * FROM grupos ORDER BY id_grupo";
 
         try (Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -105,7 +105,7 @@ public class GrupoDAOImpl implements GrupoDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return lista;

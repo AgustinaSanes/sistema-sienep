@@ -3,15 +3,14 @@ package controlador;
 import factory.abstractFactory.UsuarioFactory;
 import modelos.usuario.*;
 import proxy.PermisosProxy;
-import servicios.usuario.RolService;
+import util.EntradaHelper;
 import java.util.*;
 
 public class FuncionarioControlador {
     private final PermisosProxy proxy;
-    private final RolService rolService = new RolService();
     private final Scanner sc = new Scanner(System.in);
 
-    public FuncionarioControlador(PermisosProxy proxy){
+    public FuncionarioControlador(PermisosProxy proxy) {
         this.proxy = proxy;
     }
 
@@ -34,7 +33,7 @@ public class FuncionarioControlador {
             System.out.print("Contraseña: ");
             String contrasena = sc.nextLine();
 
-            List<Rol> roles = rolService.obtenerTodos();
+            List<Rol> roles = proxy.listarRoles();
 
             System.out.println("--- ROLES DISPONIBLES ---");
 
@@ -46,9 +45,10 @@ public class FuncionarioControlador {
 
             System.out.print("Seleccione rol: ");
 
-            Rol rol = rolService.obtenerPorId(
-                    Integer.parseInt(sc.nextLine())
-            );
+            Integer idRol = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (idRol == null) return;
+
+            Rol rol = proxy.obtenerRolPorId(idRol);
 
             if (rol == null || !rol.isEstado() || rol.getNombre().equalsIgnoreCase("Estudiante")) {
                 System.out.println("Rol inválido");
@@ -88,6 +88,10 @@ public class FuncionarioControlador {
                 System.out.println("Funcionario no encontrado");
                 return;
             }
+            if (!(usuario instanceof Funcionario)) {
+                System.out.println("El usuario no es un funcionario");
+                return;
+            }
 
             int opcion;
             do {
@@ -95,6 +99,8 @@ public class FuncionarioControlador {
                 System.out.println("1. Nombre    [" + usuario.getNombre() + "]");
                 System.out.println("2. Apellido  [" + usuario.getApellido() + "]");
                 System.out.println("3. Email     [" + usuario.getEmail() + "]");
+                System.out.println("4. Contraseña");
+                System.out.println("5. Estado    [" + (usuario.isEstado() ? "Activo" : "Inactivo") + "]");
                 System.out.println("0. Guardar y volver");
                 System.out.print("Opción: ");
 
@@ -117,6 +123,50 @@ public class FuncionarioControlador {
                         System.out.print("Nuevo email: ");
                         usuario.setEmail(sc.nextLine());
                     }
+                    case 4 -> {
+                        System.out.print("Nueva contraseña: ");
+                        String nuevaContrasena = sc.nextLine();
+                        try {
+                            proxy.cambiarContrasena(usuario.getCedula(), nuevaContrasena);
+                            System.out.println("Contraseña actualizada correctamente");
+                        } catch (Exception e) {
+                            System.out.println("Error: " + e.getMessage());
+                        }
+                    }
+                    case 5 -> {
+                        try {
+                            if (usuario.isEstado()) {
+
+                                System.out.print("¿Está seguro de desactivar este funcionario? (S/N): ");
+                                String respuesta = sc.nextLine();
+
+                                if (respuesta.equalsIgnoreCase("S")) {
+                                    proxy.desactivarUsuario(usuario.getCedula());
+                                    usuario.setEstado(false);
+                                    System.out.println("Funcionario desactivado correctamente.");
+                                } else {
+                                    System.out.println("Operación cancelada.");
+                                }
+
+                            } else {
+
+                                System.out.print("¿Desea volver a activar este funcionario? (S/N): ");
+                                String respuesta = sc.nextLine();
+
+                                if (respuesta.equalsIgnoreCase("S")) {
+                                    proxy.activarUsuario(usuario.getCedula());
+                                    usuario.setEstado(true);
+                                    System.out.println("Funcionario activado correctamente.");
+                                } else {
+                                    System.out.println("Operación cancelada.");
+                                }
+
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Error: " + e.getMessage());
+                        }
+                    }
+
                     case 0 -> System.out.println("Guardando...");
                     default -> System.out.println("Opción inválida");
                 }
@@ -125,28 +175,6 @@ public class FuncionarioControlador {
 
             proxy.modificarUsuario(usuario);
             System.out.println("Funcionario actualizado correctamente");
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-
-    public void desactivarFuncionario() {
-        try {
-            System.out.println("--- DESACTIVAR FUNCIONARIO ---");
-
-            System.out.print("Ingrese cédula: ");
-            String cedula = sc.nextLine();
-
-            Usuario usuario = proxy.buscarUsuario(cedula);
-            if (usuario == null) {
-                System.out.println("Funcionario no encontrado");
-                return;
-            }
-
-            proxy.desactivarUsuario(cedula);
-            System.out.println("Funcionario desactivado correctamente");
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -163,6 +191,10 @@ public class FuncionarioControlador {
             Usuario usuario = proxy.buscarUsuario(cedula);
             if (usuario == null) {
                 System.out.println("Funcionario no encontrado");
+                return;
+            }
+            if (!(usuario instanceof Funcionario)) {
+                System.out.println("El usuario no es un funcionario");
                 return;
             }
 
@@ -189,13 +221,16 @@ public class FuncionarioControlador {
             }
 
             System.out.println("=== FUNCIONARIOS ===");
+
             for (Usuario u : usuarios) {
-                System.out.println("----------------");
-                System.out.println("Cédula: " + u.getCedula());
-                System.out.println("Nombre: " + u.getNombre() + " " + u.getApellido());
-                System.out.println("Email: " + u.getEmail());
-                System.out.println("Rol: " + u.getRol().getNombre());
-                System.out.println("Estado: " + (u.isEstado() ? "Activo" : "Inactivo"));
+                if (!u.getRol().getNombre().equalsIgnoreCase("Estudiante")) {
+                    System.out.println("----------------");
+                    System.out.println("Cédula: " + u.getCedula());
+                    System.out.println("Nombre: " + u.getNombre() + " " + u.getApellido());
+                    System.out.println("Email: " + u.getEmail());
+                    System.out.println("Rol: " + u.getRol().getNombre());
+                    System.out.println("Estado: " + (u.isEstado() ? "Activo" : "Inactivo"));
+                }
             }
 
         } catch (Exception e) {

@@ -5,6 +5,7 @@ public class ConexionBDSingleton {
     private static ConexionBDSingleton instancia;
     private final Connection conexion;
 
+    // Conexion a DB
     private ConexionBDSingleton() {
         String url = "jdbc:postgresql://localhost:5432/proyecto";
         String usuario = "postgres";

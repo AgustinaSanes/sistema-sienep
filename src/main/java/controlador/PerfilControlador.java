@@ -1,15 +1,18 @@
 package controlador;
 
 import modelos.usuario.*;
-import servicios.usuario.*;
+import proxy.PermisosProxy;
+import util.EntradaHelper;
 
 import java.util.*;
 
 public class PerfilControlador {
-    private final RolService rolService = new RolService();
-    private final PermisoService permisoService = new PermisoService();
-    private final RolPermisoService rolPermisoService = new RolPermisoService();
+    private final PermisosProxy proxy;
     private final Scanner sc = new Scanner(System.in);
+
+    public PerfilControlador(PermisosProxy proxy) {
+        this.proxy = proxy;
+    }
 
     // ROLES
     public void crearRol() {
@@ -23,7 +26,7 @@ public class PerfilControlador {
             rol.setNombre(nombre);
             rol.setEstado(true);
 
-            rolService.agregarRol(rol);
+            proxy.agregarRol(rol);
             System.out.println("Rol creado correctamente");
 
         } catch (Exception e) {
@@ -36,9 +39,10 @@ public class PerfilControlador {
             System.out.println("--- MODIFICAR ROL ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (id == null) return;
 
-            Rol rol = rolService.obtenerPorId(id);
+            Rol rol = proxy.obtenerRolPorId(id);
 
             if (rol == null) {
                 System.out.println("Rol no encontrado");
@@ -49,7 +53,7 @@ public class PerfilControlador {
             System.out.print("Nuevo nombre: ");
             rol.setNombre(sc.nextLine());
 
-            rolService.actualizarRol(rol);
+            proxy.actualizarRol(rol);
             System.out.println("Rol actualizado");
 
         } catch (Exception e) {
@@ -62,9 +66,10 @@ public class PerfilControlador {
             System.out.println("--- ELIMINAR ROL ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (id == null) return;
 
-            rolService.eliminarRol(id);
+            proxy.eliminarRol(id);
             System.out.println("Rol eliminado");
 
         } catch (Exception e) {
@@ -77,9 +82,10 @@ public class PerfilControlador {
             System.out.println("--- BUSCAR ROL ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (id == null) return;
 
-            Rol rol = rolService.obtenerPorId(id);
+            Rol rol = proxy.obtenerRolPorId(id);
             if (rol == null) {
                 System.out.println("No encontrado");
                 return;
@@ -95,18 +101,22 @@ public class PerfilControlador {
     }
 
     public void listarRoles() {
-        List<Rol> roles = rolService.obtenerTodos();
+        try {
+            List<Rol> roles = proxy.listarRoles();
 
-        if (roles.isEmpty()) {
-            System.out.println("No hay roles");
-            return;
-        }
+            if (roles.isEmpty()) {
+                System.out.println("No hay roles");
+                return;
+            }
 
-        for (Rol r : roles) {
-            System.out.println("----------------");
-            System.out.println("ID: " + r.getId());
-            System.out.println("Nombre: " + r.getNombre());
-            System.out.println("Estado: " + (r.isEstado() ? "Activo" : "Inactivo"));
+            for (Rol r : roles) {
+                System.out.println("----------------");
+                System.out.println("ID: " + r.getId());
+                System.out.println("Nombre: " + r.getNombre());
+                System.out.println("Estado: " + (r.isEstado() ? "Activo" : "Inactivo"));
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -121,7 +131,7 @@ public class PerfilControlador {
             Permiso p = new Permiso();
             p.setDescripcion(desc);
 
-            permisoService.agregarPermiso(p);
+            proxy.agregarPermiso(p);
             System.out.println("Permiso creado");
 
         } catch (Exception e) {
@@ -134,9 +144,10 @@ public class PerfilControlador {
             System.out.println("--- MODIFICAR PERMISO ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de permiso válido");
+            if (id == null) return;
 
-            Permiso p = permisoService.obtenerPorId(id);
+            Permiso p = proxy.obtenerPermisoPorId(id);
 
             if (p == null) {
                 System.out.println("Permiso no encontrado");
@@ -147,7 +158,7 @@ public class PerfilControlador {
             System.out.print("Nuevo: ");
             p.setDescripcion(sc.nextLine());
 
-            permisoService.actualizarPermiso(p);
+            proxy.actualizarPermiso(p);
             System.out.println("Permiso actualizado");
 
         } catch (Exception e) {
@@ -160,9 +171,10 @@ public class PerfilControlador {
             System.out.println("--- ELIMINAR PERMISO ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de permiso válido");
+            if (id == null) return;
 
-            permisoService.eliminarPermiso(id);
+            proxy.eliminarPermiso(id);
             System.out.println("Permiso eliminado");
 
         } catch (Exception e) {
@@ -175,9 +187,10 @@ public class PerfilControlador {
             System.out.println("--- BUSCAR PERMISO ---");
 
             System.out.print("ID: ");
-            int id = Integer.parseInt(sc.nextLine());
+            Integer id = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de permiso válido");
+            if (id == null) return;
 
-            Permiso p = permisoService.obtenerPorId(id);
+            Permiso p = proxy.obtenerPermisoPorId(id);
 
             if (p == null) {
                 System.out.println("Permiso no encontrado");
@@ -193,17 +206,21 @@ public class PerfilControlador {
     }
 
     public void listarPermisos() {
-        List<Permiso> permisos = permisoService.obtenerTodos();
+        try {
+            List<Permiso> permisos = proxy.listarPermisos();
 
-        if (permisos.isEmpty()) {
-            System.out.println("No hay permisos");
-            return;
-        }
+            if (permisos.isEmpty()) {
+                System.out.println("No hay permisos");
+                return;
+            }
 
-        for (Permiso p : permisos) {
-            System.out.println("----------------");
-            System.out.println("ID: " + p.getId());
-            System.out.println("Descripción: " + p.getDescripcion());
+            for (Permiso p : permisos) {
+                System.out.println("----------------");
+                System.out.println("ID: " + p.getId());
+                System.out.println("Descripción: " + p.getDescripcion());
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -213,12 +230,14 @@ public class PerfilControlador {
             System.out.println("--- ASIGNAR PERMISO ---");
 
             System.out.print("ID Rol: ");
-            int idRol = Integer.parseInt(sc.nextLine());
+            Integer idRol = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (idRol == null) return;
 
             System.out.print("ID Permiso: ");
-            int idPermiso = Integer.parseInt(sc.nextLine());
+            Integer idPermiso = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de permiso válido");
+            if (idPermiso == null) return;
 
-            rolPermisoService.asignarPermiso(idRol, idPermiso);
+            proxy.asignarPermisoARol(idRol, idPermiso);
 
             System.out.println("Permiso asignado correctamente");
 
@@ -232,12 +251,14 @@ public class PerfilControlador {
             System.out.println("--- QUITAR PERMISO ---");
 
             System.out.print("ID Rol: ");
-            int idRol = Integer.parseInt(sc.nextLine());
+            Integer idRol = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (idRol == null) return;
 
             System.out.print("ID Permiso: ");
-            int idPermiso = Integer.parseInt(sc.nextLine());
+            Integer idPermiso = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de permiso válido");
+            if (idPermiso == null) return;
 
-            rolPermisoService.quitarPermiso(idRol,idPermiso);
+            proxy.quitarPermisoDeRol(idRol, idPermiso);
 
             System.out.println("Permiso quitado correctamente");
 
@@ -252,17 +273,17 @@ public class PerfilControlador {
             System.out.println("--- PERMISOS DEL ROL ---");
 
             System.out.print("ID Rol: ");
-            int idRol = Integer.parseInt(sc.nextLine());
+            Integer idRol = EntradaHelper.leerEntero(sc, "Debe ingresar un ID de rol válido");
+            if (idRol == null) return;
 
-            List<Permiso> permisos =
-                    rolPermisoService.obtenerPermisosRol(idRol);
+            List<Permiso> permisos = proxy.obtenerPermisosRol(idRol);
 
-            if(permisos.isEmpty()){
+            if (permisos.isEmpty()) {
                 System.out.println("No hay permisos");
                 return;
             }
 
-            for(Permiso p : permisos){
+            for (Permiso p : permisos) {
 
                 System.out.println("----------------");
                 System.out.println("ID: " + p.getId());
@@ -270,7 +291,7 @@ public class PerfilControlador {
                         + p.getDescripcion());
             }
 
-        } catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }

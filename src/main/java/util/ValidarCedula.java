@@ -4,10 +4,14 @@ public class ValidarCedula {
 
     private static final int[] FACTORES = {2, 9, 8, 7, 6, 3, 4};
 
-    public static boolean esValida(String cedula) {
+    public static void validar(String cedula) {
 
-        if (cedula == null || !cedula.matches("\\d{8}")) {
-            return false;
+        if (cedula == null || cedula.trim().isEmpty()) {
+            throw new RuntimeException("La cédula es obligatoria");
+        }
+
+        if (!cedula.matches("\\d{8}")) {
+            throw new RuntimeException("La cédula debe tener 8 dígitos");
         }
 
         int suma = 0;
@@ -22,6 +26,8 @@ public class ValidarCedula {
 
         int ultimoDigito = Character.getNumericValue(cedula.charAt(7));
 
-        return digitoVerificador == ultimoDigito;
+        if (digitoVerificador != ultimoDigito) {
+            throw new RuntimeException("La cédula es inválida");
+        }
     }
 }

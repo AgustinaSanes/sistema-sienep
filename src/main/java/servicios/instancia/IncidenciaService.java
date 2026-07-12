@@ -75,21 +75,6 @@ public class IncidenciaService {
         incidenciaDAO.actualizarIncidencia(incidencia);
     }
 
-    public void eliminarIncidencia(int idInstancia) {
-        if (idInstancia <= 0) {
-            throw new RuntimeException("ID inválido");
-        }
-        involucradoDAO.eliminarPorIncidencia(idInstancia);
-        incidenciaDAO.eliminarPorInstancia(idInstancia);
-    }
-
-    public Incidencia obtenerPorInstancia(int idInstancia) {
-        if (idInstancia <= 0) {
-            throw new RuntimeException("ID inválido");
-        }
-        return incidenciaDAO.obtenerPorInstancia(idInstancia);
-    }
-
     public List<String> obtenerInvolucrados(int idInstancia) {
         if (idInstancia <= 0) {
             throw new RuntimeException("ID inválido");

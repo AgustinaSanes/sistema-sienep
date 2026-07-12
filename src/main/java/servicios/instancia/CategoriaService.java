@@ -1,27 +1,19 @@
 package servicios.instancia;
 import dao.instancia.CategoriaDAO;
 import dao.instancia.CategoriaDAOImpl;
+import dao.instancia.InstanciaDAO;
+import dao.instancia.InstanciaDAOImpl;
 import modelos.instancia.Categoria;
 import java.util.List;
 
 public class CategoriaService {
 
     private final CategoriaDAO categoriaDAO;
+    private final InstanciaDAO instanciaDAO;
 
     public CategoriaService() {
         this.categoriaDAO = new CategoriaDAOImpl();
-        inicializarCategoriasBase();
-    }
-
-    private void inicializarCategoriasBase() {
-        List<Categoria> existentes = categoriaDAO.obtenerTodas();
-        for (Categoria base : Categoria.cargarCategoriasBase()) {
-            boolean yaExiste = existentes.stream()
-                    .anyMatch(e -> e.getNombre().equalsIgnoreCase(base.getNombre()));
-            if (!yaExiste) {
-                categoriaDAO.agregarCategoria(base);
-            }
-        }
+        this.instanciaDAO = new InstanciaDAOImpl();
     }
 
     private void validarCategoria(Categoria categoria) {
@@ -58,6 +50,12 @@ public class CategoriaService {
     public void eliminarCategoria(int id) {
         if (id <= 0) {
             throw new RuntimeException("ID inválido");
+        }
+        if (categoriaDAO.obtenerPorId(id) == null) {
+            throw new RuntimeException("La categoría no existe");
+        }
+        if (!instanciaDAO.obtenerPorCategoria(id).isEmpty()) {
+            throw new RuntimeException("La categoría se encuentra en uso y no puede darse de baja");
         }
         categoriaDAO.eliminarCategoria(id);
     }

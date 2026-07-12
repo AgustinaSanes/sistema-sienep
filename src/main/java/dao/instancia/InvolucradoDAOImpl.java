@@ -21,7 +21,7 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
             ps.setString(2, involucrado);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -37,7 +37,7 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -49,14 +49,14 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
             ps.setInt(1, idInstancia);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<String> obtenerPorIncidencia(int idInstancia) {
         List<String> lista = new ArrayList<>();
-        String sql = "SELECT involucrado FROM involucrados WHERE id_instancia = ?";
+        String sql = "SELECT involucrado FROM involucrados WHERE id_instancia = ? ORDER BY involucrado";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idInstancia);
@@ -66,7 +66,7 @@ public class InvolucradoDAOImpl implements InvolucradoDAO {
                 lista.add(rs.getString("involucrado"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

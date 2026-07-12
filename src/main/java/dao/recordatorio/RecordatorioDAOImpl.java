@@ -1,5 +1,6 @@
 package dao.recordatorio;
 import conexionDB.ConexionBDSingleton;
+import modelos.recordatorio.CategoriaRecordatorio;
 import modelos.recordatorio.Recordatorio;
 import modelos.recordatorio.Frecuencia;
 import java.sql.*;
@@ -17,16 +18,17 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public void agregarRecordatorio(Recordatorio recordatorio) {
         String sql = "INSERT INTO recordatorios " +
-                "(id_instancia, id_frecuencia, titulo, fec_hora, tipo, estado) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "(id_instancia, id_frecuencia, id_cate_recordatorio, titulo, fec_hora, tipo, estado) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, recordatorio.getIdInstancia());
             ps.setInt(2, recordatorio.getFrecuencia().getId());
-            ps.setString(3, recordatorio.getTitulo());
-            ps.setTimestamp(4, Timestamp.valueOf(recordatorio.getFechaHora()));
-            ps.setString(5, recordatorio.getTipo());
-            ps.setBoolean(6, recordatorio.isEstado());
+            ps.setInt(3, recordatorio.getCategoria().getId());
+            ps.setString(4, recordatorio.getTitulo());
+            ps.setTimestamp(5, Timestamp.valueOf(recordatorio.getFechaHora()));
+            ps.setString(6, recordatorio.getTipo());
+            ps.setBoolean(7, recordatorio.isEstado());
 
             ps.executeUpdate();
 
@@ -35,27 +37,28 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
                 recordatorio.setId(rs.getInt(1));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void actualizarRecordatorio(Recordatorio recordatorio) {
         String sql = "UPDATE recordatorios SET " +
-                "id_frecuencia=?, titulo=?, fec_hora=?, tipo=?, estado=? " +
+                "id_frecuencia=?, id_cate_recordatorio=?, titulo=?, fec_hora=?, tipo=?, estado=? " +
                 "WHERE id_recordatorio=?";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, recordatorio.getFrecuencia().getId());
-            ps.setString(2, recordatorio.getTitulo());
-            ps.setTimestamp(3, Timestamp.valueOf(recordatorio.getFechaHora()));
-            ps.setString(4, recordatorio.getTipo());
-            ps.setBoolean(5, recordatorio.isEstado());
-            ps.setInt(6, recordatorio.getId());
+            ps.setInt(2, recordatorio.getCategoria().getId());
+            ps.setString(3, recordatorio.getTitulo());
+            ps.setTimestamp(4, Timestamp.valueOf(recordatorio.getFechaHora()));
+            ps.setString(5, recordatorio.getTipo());
+            ps.setBoolean(6, recordatorio.isEstado());
+            ps.setInt(7, recordatorio.getId());
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -67,16 +70,22 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public Recordatorio obtenerPorId(int id) {
-        String sql = "SELECT r.*, f.descripcion AS desc_frecuencia " +
-                "FROM recordatorios r " +
-                "JOIN frecuencias f ON r.id_frecuencia = f.id_frecuencia " +
-                "WHERE r.id_recordatorio = ? AND r.estado = true";
+        String sql =
+                "SELECT r.*, " +
+                        "f.descripcion AS desc_frecuencia, " +
+                        "f.estado AS estado_frecuencia, " +
+                        "cr.nombre AS nombre_categoria, " +
+                        "cr.estado AS estado_categoria " +
+                        "FROM recordatorios r " +
+                        "JOIN frecuencias f ON r.id_frecuencia = f.id_frecuencia " +
+                        "JOIN reco_categorias cr ON r.id_cate_recordatorio = cr.id_cate_recordatorio " +
+                        "WHERE r.id_recordatorio = ? AND r.estado = true";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -86,7 +95,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
                 return mapearRecordatorio(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -94,10 +103,17 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public List<Recordatorio> obtenerPorInstancia(int idInstancia) {
         List<Recordatorio> lista = new ArrayList<>();
-        String sql = "SELECT r.*, f.descripcion AS desc_frecuencia " +
-                "FROM recordatorios r " +
-                "JOIN frecuencias f ON r.id_frecuencia = f.id_frecuencia " +
-                "WHERE r.id_instancia = ? AND r.estado = true";
+        String sql =
+                "SELECT r.*, " +
+                        "f.descripcion AS desc_frecuencia, " +
+                        "f.estado AS estado_frecuencia, " +
+                        "cr.nombre AS nombre_categoria, " +
+                        "cr.estado AS estado_categoria " +
+                        "FROM recordatorios r " +
+                        "JOIN frecuencias f ON r.id_frecuencia = f.id_frecuencia " +
+                        "JOIN reco_categorias cr ON r.id_cate_recordatorio = cr.id_cate_recordatorio " +
+                        "WHERE r.id_instancia = ? AND r.estado = true " +
+                        "ORDER BY r.fec_hora";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idInstancia);
@@ -107,12 +123,25 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
                 lista.add(mapearRecordatorio(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
 
     private Recordatorio mapearRecordatorio(ResultSet rs) throws SQLException {
+
+        Frecuencia frecuencia = new Frecuencia(
+                rs.getInt("id_frecuencia"),
+                rs.getString("desc_frecuencia"),
+                rs.getBoolean("estado_frecuencia")
+        );
+
+        CategoriaRecordatorio categoria = new CategoriaRecordatorio(
+                rs.getInt("id_cate_recordatorio"),
+                rs.getString("nombre_categoria"),
+                rs.getBoolean("estado_categoria")
+        );
+
         return new Recordatorio(
                 rs.getInt("id_recordatorio"),
                 rs.getInt("id_instancia"),
@@ -120,10 +149,8 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
                 rs.getTimestamp("fec_hora").toLocalDateTime(),
                 rs.getString("tipo"),
                 rs.getBoolean("estado"),
-                new Frecuencia(
-                        rs.getInt("id_frecuencia"),
-                        rs.getString("desc_frecuencia")
-                )
+                frecuencia,
+                categoria
         );
     }
 }

@@ -5,6 +5,7 @@ import dao.usuario.EstudianteDAOImpl;
 import modelos.usuario.Estudiante;
 import util.ValidarCedula;
 import util.ValidarEdad;
+import util.ValidarTelefono;
 
 import java.util.List;
 
@@ -24,9 +25,8 @@ public class EstudianteService {
         }
 
         // Cédula
-        if (!ValidarCedula.esValida(estudiante.getCedula())) {
-            throw new RuntimeException("Cédula inválida");
-        }
+        ValidarCedula.validar(estudiante.getCedula());
+
         // Sistema salud
         if (estudiante.getSistemaSalud() == null ||
                 estudiante.getSistemaSalud().trim().isEmpty()) {
@@ -55,26 +55,33 @@ public class EstudianteService {
         // Foto
         if (estudiante.getFoto() != null &&
                 estudiante.getFoto().length() > 250) {
-            throw new RuntimeException("Ruta de foto demasiado larga");
+            throw new RuntimeException("La ruta de foto no puede superar los 250 caracteres");
         }
         // Observaciones
         if (estudiante.getObsComentarios() != null &&
                 estudiante.getObsComentarios().length() > 250) {
-            throw new RuntimeException("Comentario demasiado largo");
+            throw new RuntimeException("El comentario no puede superar los 250 caracteres");
         }
         // Info salud
         if (estudiante.getInfoEstadoSalud() != null &&
                 estudiante.getInfoEstadoSalud().length() > 250) {
-            throw new RuntimeException("Información de salud demasiado larga");
+            throw new RuntimeException("La información de salud no puede superar los 250 caracteres");
         }
         // Dirección
         if (estudiante.getCalle() != null &&
                 estudiante.getCalle().length() > 50) {
-            throw new RuntimeException("La calle no debe superar los 50 caracteres");
+            throw new RuntimeException("La calle no puede superar los 50 caracteres");
         }
         if (estudiante.getNroPuerta() != null &&
                 estudiante.getNroPuerta().length() > 50) {
-            throw new RuntimeException("Número de puerta no debe superar los 50 caracteres");
+            throw new RuntimeException("Número de puerta no puede superar los 50 caracteres");
+        }
+        if (estudiante.getTelefono() == null || estudiante.getTelefono().isEmpty()) {
+            throw new RuntimeException("Debe ingresar al menos un teléfono");
+        }
+
+        for (String telefono : estudiante.getTelefono()) {
+            ValidarTelefono.validar(telefono);
         }
     }
 
@@ -108,9 +115,7 @@ public class EstudianteService {
     //Obtener estudiante por cedula
     public Estudiante obtenerPorCedula(String cedula) {
 
-        if (!ValidarCedula.esValida(cedula)) {
-            throw new RuntimeException("Cédula inválida");
-        }
+        ValidarCedula.validar(cedula);
 
         return estudianteDAO.obtenerPorCedula(cedula);
     }

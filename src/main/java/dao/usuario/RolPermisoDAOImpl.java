@@ -37,7 +37,7 @@ public class RolPermisoDAOImpl implements RolPermisoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -59,7 +59,7 @@ public class RolPermisoDAOImpl implements RolPermisoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -76,7 +76,8 @@ public class RolPermisoDAOImpl implements RolPermisoDAO {
                         "JOIN rol_permisos rp " +
                         "ON p.id_permiso = rp.id_permiso " +
                         "WHERE rp.id_rol = ? " +
-                        "AND p.estado = true";
+                        "AND p.estado = true " +
+                        "ORDER BY p.descripcion";
 
         try (PreparedStatement ps =
                      c.prepareStatement(sql)) {
@@ -98,7 +99,7 @@ public class RolPermisoDAOImpl implements RolPermisoDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
 
         return permisos;

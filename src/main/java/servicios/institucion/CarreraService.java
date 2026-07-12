@@ -38,9 +38,19 @@ public class CarreraService {
 
     public void actualizarCarrera(Carrera carrera) {
         validarCarrera(carrera);
-        if (carreraDAO.obtenerPorId(carrera.getId()) == null) {
+
+        Carrera existente = carreraDAO.obtenerPorId(carrera.getId());
+        if (existente == null) {
             throw new RuntimeException("La carrera no existe");
         }
+
+        for (Carrera c : carreraDAO.obtenerTodas()) {
+            if (c.getId() != carrera.getId()
+                    && c.getNombre().equalsIgnoreCase(carrera.getNombre())) {
+                throw new RuntimeException("Ya existe una carrera con ese nombre");
+            }
+        }
+
         carreraDAO.actualizarCarrera(carrera);
     }
 
@@ -48,6 +58,15 @@ public class CarreraService {
         if (id <= 0) {
             throw new RuntimeException("ID inválido");
         }
+
+        Carrera existente = carreraDAO.obtenerPorId(id);
+        if (existente == null) {
+            throw new RuntimeException("La carrera no existe");
+        }
+        if (!existente.isEstado()) {
+            throw new RuntimeException("La carrera ya se encuentra dada de baja");
+        }
+
         carreraDAO.eliminarCarrera(id);
     }
 

@@ -19,7 +19,7 @@ public class PermisoDAOImpl implements PermisoDAO {
             ps.setString(1, permiso.getDescripcion());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
     @Override
@@ -30,7 +30,7 @@ public class PermisoDAOImpl implements PermisoDAO {
             ps.setInt(2, permiso.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
     @Override
@@ -40,7 +40,7 @@ public class PermisoDAOImpl implements PermisoDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
     @Override
@@ -57,14 +57,14 @@ public class PermisoDAOImpl implements PermisoDAO {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
     @Override
     public List<Permiso> obtenerTodos() {
         List<Permiso> permisos = new ArrayList<>();
-        String sql = "SELECT * FROM permisos";
+        String sql = "SELECT * FROM permisos ORDER BY id_permiso";
         try (PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -76,7 +76,7 @@ public class PermisoDAOImpl implements PermisoDAO {
                 permisos.add(permiso);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return permisos;
     }

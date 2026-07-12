@@ -21,7 +21,7 @@ public class TelefonoDAOImpl implements TelefonoDAO {
             ps.setString(2, numero);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -37,14 +37,14 @@ public class TelefonoDAOImpl implements TelefonoDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<String> obtenerPorEstudiante(String cedula) {
         List<String> lista = new ArrayList<>();
-        String sql = "SELECT numero FROM telefonos WHERE cedula = ?";
+        String sql = "SELECT numero FROM telefonos WHERE cedula = ? ORDER BY numero";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, cedula);
@@ -54,7 +54,7 @@ public class TelefonoDAOImpl implements TelefonoDAO {
                 lista.add(rs.getString("numero"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

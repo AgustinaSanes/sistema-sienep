@@ -27,7 +27,7 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
             ps.setString(4, auditoria.getEntidadAfectada());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -43,7 +43,7 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
                 lista.add(mapearAuditoria(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -61,7 +61,7 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
                 lista.add(mapearAuditoria(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -76,7 +76,7 @@ public class AuditoriaDAOImpl implements AuditoriaDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) lista.add(mapearAuditoria(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

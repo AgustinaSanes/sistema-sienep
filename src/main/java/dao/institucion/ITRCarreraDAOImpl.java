@@ -21,7 +21,7 @@ public class ITRCarreraDAOImpl implements ITRCarreraDAO {
             ps.setInt(2, idCarrera);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -34,14 +34,14 @@ public class ITRCarreraDAOImpl implements ITRCarreraDAO {
             ps.setInt(2, idCarrera);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<Integer> obtenerCarrerasPorITR(int idItr) {
         List<Integer> lista = new ArrayList<>();
-        String sql = "SELECT id_carrera FROM itr_carreras WHERE id_itr = ?";
+        String sql = "SELECT id_carrera FROM itr_carreras WHERE id_itr = ? ORDER BY id_carrera";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idItr);
@@ -51,7 +51,7 @@ public class ITRCarreraDAOImpl implements ITRCarreraDAO {
                 lista.add(rs.getInt("id_carrera"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -59,7 +59,7 @@ public class ITRCarreraDAOImpl implements ITRCarreraDAO {
     @Override
     public List<Integer> obtenerITRsPorCarrera(int idCarrera) {
         List<Integer> lista = new ArrayList<>();
-        String sql = "SELECT id_itr FROM itr_carreras WHERE id_carrera = ?";
+        String sql = "SELECT id_itr FROM itr_carreras WHERE id_carrera = ? ORDER BY id_itr";
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, idCarrera);
@@ -69,7 +69,7 @@ public class ITRCarreraDAOImpl implements ITRCarreraDAO {
                 lista.add(rs.getInt("id_itr"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

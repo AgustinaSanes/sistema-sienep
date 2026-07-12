@@ -18,7 +18,7 @@ public class RolDAOImpl implements RolDAO {
             ps.setString(1, rol.getNombre());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -30,7 +30,7 @@ public class RolDAOImpl implements RolDAO {
             ps.setInt(2, rol.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -45,7 +45,7 @@ public class RolDAOImpl implements RolDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
     }
 
@@ -64,7 +64,7 @@ public class RolDAOImpl implements RolDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return null;
     }
@@ -72,7 +72,7 @@ public class RolDAOImpl implements RolDAO {
     @Override
     public List<Rol> obtenerTodos() {
         List<Rol> lista = new ArrayList<>();
-        String sql = "SELECT * FROM roles";
+        String sql = "SELECT * FROM roles ORDER BY id_rol";
         try (Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -84,7 +84,7 @@ public class RolDAOImpl implements RolDAO {
                 lista.add(rol);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error de base de datos: " + e.getMessage(), e);
         }
         return lista;
     }

@@ -1,13 +1,17 @@
 package controlador;
 
 import factory.factoryMethod.exportador.*;
-import factory.factoryMethod.reporte.Reporte;
-import factory.factoryMethod.reporte.ReporteFactory;
+import proxy.PermisosProxy;
 
 import java.util.Scanner;
 
 public class ReporteControlador {
+    private final PermisosProxy proxy;
     private final Scanner sc = new Scanner(System.in);
+
+    public ReporteControlador(PermisosProxy proxy) {
+        this.proxy = proxy;
+    }
 
     public void reporteEstudiante() {
         try {
@@ -15,8 +19,7 @@ public class ReporteControlador {
 
             String cedula = sc.nextLine();
 
-            Reporte reporte = ReporteFactory.crearReporte("estudiante");
-            String contenido = reporte.generar(cedula);
+            String contenido = proxy.generarReporteEstudiante(cedula);
             reporteSalida(contenido);
 
         } catch (Exception e) {
@@ -29,8 +32,7 @@ public class ReporteControlador {
             System.out.print("Filtrar por rol (Enter para mostrar todos): ");
             String filtroRol = sc.nextLine();
 
-            Reporte reporte = ReporteFactory.crearReporte("general");
-            String contenido = reporte.generar(filtroRol);
+            String contenido = proxy.generarReporteGeneral(filtroRol);
 
             reporteSalida(contenido);
 
